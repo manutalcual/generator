@@ -1,0 +1,498 @@
+//
+syntax = "proto2";
+// Paquete de intercambio de mensajes para BY
+package Bytech.Base;
+
+// Cabecera de todo mensaje intercambiado a través del protocolo
+// de comunicaciones.
+message MessageHeader {		
+	// Código de la acción sobre la entidad
+	required int32 action = 1;
+	// Tipo de paquete de la entidas
+	required int32 package = 2;	
+	// Código de la entidad que viaja encapsulada
+	required int32 entity = 3;
+	// Secuencia del mensaje
+	required int32 sequence = 4;
+	// Versión de la interfaz de intercambio de comandos
+	// Si se cambian las entidades actuales se modifica el byte de menor peso
+	// Si se añaden nuevas entidades se modifica el segundo byte de menor peso	
+	// Si se cambia este mensaje base se modifica el tercer byte
+	// El cuarto byte se reserva para una reimplementación
+	// VERSION ACTUAL 1.0.0.0	
+        optional bytes version = 5 [default = "\x1\x0\x0\x0"];
+	// Indica la secuencia de cambio (código de changeset)
+	required uint64 changeset_id = 6;
+	// Indica el último orden procesado dentro del changeset
+	required uint32 order = 7;
+	// Indica la cantidad de cambios que componen el changeset
+	required uint32 microtransactions_count = 8;
+}
+
+// Mensaje principal para intercambio de entidad que debe
+// utilizarse para implementar el polimorfismo,
+message MessageExchange {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;		
+}
+
+// Entidad asociada a un terminal
+message Result {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Código de resultado de la última operación ejecutada
+	optional int32 result_code = 2;
+	// Cadena de texto asociada al resultado
+	optional string result_string = 3;
+	// Lista de identificadores de entidades en los que la operación terminó correctamente
+	repeated int32 id_list_ok = 4;
+	// Lista de identificadores de entidades en los que la operación terminó con error
+	repeated int32 id_list_error = 5;	
+}
+
+//--ControllerInfo--Entidad asociada a un terminal
+message ControllerInfo {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Tipo del equipo que emite el mensaje
+	required uint32 product_type = 2;		
+	// Dirección física del equipo
+	optional int32 fixed_address = 3;
+	// Dirección MAC del equipo
+	required bytes mac_address = 4;
+	// Versión hardware del equipo "PM"
+	optional string hw_version = 5;	
+	// Fecha de fabricación del equipo en UTC
+	required uint32 mf_date = 6;		
+	// Versión de la aplicación del equipo	
+	// El byte de menor peso indica cambios menores
+	// El segundo byte de menor peso indica cambios medios	
+	// El tercer byte se reserva para una reimplementación o cambios mayores	
+	optional bytes app_version = 7;
+	// Versión del bootloader del equipo.
+	// El byte de menor peso indica cambios menores
+	// El segundo byte de menor peso indica cambios medios	
+	// El tercer byte se reserva para una reimplementación o cambios mayores	
+	optional bytes boot_version = 8;
+	// Configuración de las comunicaciones IP
+	optional IpConfig ip_config = 9;
+	// Número de huellas que contiene el controlador
+	optional int32 fingerprints_count = 10;
+	// Número de tags que contiene el controlador
+	optional int32 tags_count = 11;	
+	// Indica el estado de todas las entradas del controlador. Es un valor del enumerado InputState
+	repeated int32 inputs_state = 12;
+	// Indica el estado de todas las salidas del controlador. Es un valor del enumerado OutputState
+	repeated int32 outputs_state = 13;
+	// Indica el tipo de tarjetas que aceptan los lectores de la instalación. Es un valor del enumerado AcceptedCards
+	optional int32 cards_type = 14;
+	// Indica el modo de funcionamiento del controlador. Es un valor del enumerado ControllerMode en control de accesos y del enumerador ClockingMode en sistema TABS.
+	optional uint32 controller_mode = 15;
+	// Indica el identificador del controlador. Usado en proyecto TABS.
+	optional string identifier = 16;
+	// Indica el tamaño de la memoria flash del controlador
+	optional uint32 flash_memory_capacity = 17;
+    // Indica el estado de sincronización de huellas del controlador debe ser un valor
+    // del enumerado SyncStatus
+    optional uint32 sync_status = 18;
+}
+
+message IpConfig {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Dirección MAC que debe atender a esta configuración
+	required bytes mac_address = 2;
+	// Dirección IP de versión 4
+	optional int32 IpV4Address = 3;
+	// Dirección IP de versión 6
+	optional int64 IpV6Address = 4;	
+	// Subred
+	optional int32 Subnet = 5;
+	// Puerta de enlace versión 4
+	optional int32 GatewayV4 = 6;
+	// Puerta de enlace versión 6
+	optional int64 GatewayV6 = 7;
+	// Configuración de los canales de servicio del equipo
+	repeated ChannelIpConfig channels = 8;
+}
+
+message ChannelIpConfig {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Tipo de canal a configurar
+	required int32 channel_type = 2;
+	// Dirección IP de versión 4
+	optional int32 IpV4Address = 3;
+	// Dirección IP de versión 6
+	optional int64 IpV6Address = 4;	
+	// Puerto al que se debe conectar
+	optional int32 port = 5;
+	// Indica si la comunición debe ir cifrada
+	optional bool is_communication_encrypted = 6;
+	// Indica que la comunicación se está realizando por este canal
+	required bool is_current_channel = 7;
+}
+
+// Entidad asociada a un firmware
+message Firmware {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Tipo producto al que se desea actualizar el firmware
+	optional int32 product_type = 2;	
+	// Número de páginas que forman el firmware
+	optional int32 pages_count = 3;
+	// Número de página actual
+	optional int32 current_page = 4;
+	// Dirección de la página 
+	optional int32 address = 5;
+	// Bytes de la página
+	optional bytes page = 6;
+	// Bytes de la posible firma
+	optional bytes signature = 7;
+	// ID del terminal al que descargarle el firmware, si se envia a NULL
+	// debe enviarse a todos los terminales.
+	optional int32 terminal_id = 8;	
+}
+
+// Entidad asociada a la fecha y hora del sistema
+message Time {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Hora UTC 
+	optional int32 UTC = 2;
+	// Desfase horario en segundos 
+	optional int32 time_zone = 3;
+	// Reglas de ajuste para el sistema DST
+	repeated DaylightSaving dst = 4;
+}
+
+// Entidad asociada a las reglas de ajuste de hora en el sistema DST.
+message DaylightSaving {		
+	// Cabecera de todo mensaje
+	optional MessageHeader header = 1;
+	// Regla del sistema DST 
+	optional int32 rule = 2;	
+	// Mes 
+	optional int32 month = 3;
+	// Día de la semana 
+	optional int32 week_day = 4;
+	// Día del mes
+	optional int32 month_day = 5;
+	// Hora a la que introducir el cambio
+	optional int32 change_hour = 6;
+	// Minuto en el que introducir el cambio
+	optional int32 change_minute = 7;	
+	// Cantidad de segundos que debe ajustarse el cambio
+	optional int32 seconds = 8;			
+}
+
+// Entidad asociada a un terminal conectado a un controlador
+message Terminal {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Dirección física del terminal
+	required int32 id = 2;		
+	// Dirección física del terminal
+	required int32 fixed_address = 3;	
+	// Tipo del terminal
+	optional int32 product_type = 4;
+	// Versión de la aplicación del equipo	
+	// El byte de menor peso indica cambios menores
+	// El segundo byte de menor peso indica cambios medios	
+	// El tercer byte se reserva para una reimplementación o cambios mayores	
+	optional bytes app_version = 5;
+	// Versión del bootloader del equipo.
+	// El byte de menor peso indica cambios menores
+	// El segundo byte de menor peso indica cambios medios	
+	// El tercer byte se reserva para una reimplementación o cambios mayores	
+	optional bytes boot_version = 6;	
+	// Versión hardware del equipo "PM"
+	optional string hw_version = 7;	
+	// Fecha de fabricación del equipo en UTC
+	optional uint32 mf_date = 8;				
+	// Posicion que ocupa en el bus de comunicaciones.
+	optional uint32 bus_position = 9;
+	// Número de huellas que contiene el terminal en caso de ser biométrico
+	optional int32 fingerprints_count = 10;
+	// Tipo de lector biométrico en caso de ser un lector biométrico, es un valor del enumerado Base.BiometricReaderType
+	optional int32 biometric_reader_type = 11;
+	// Versión del firmware del lector biométrico
+	optional bytes biometric_reader_version = 12;
+	// Indica el estado de todas las entradas del terminal. Es un valor del enumerado InputState
+	repeated int32 inputs_state = 13;
+	// Indica el estado de todas las salidas del terminal. Es un valor del enumerado OutputState
+	repeated int32 outputs_state = 14;
+	// Indica el nivel de buzzer del terminal. Es un valor del enumerdo BuzzerLevel
+	optional int32 buzzer_level = 15;
+	// Indica el bus de comunicaciones que usa en caso de que el controaldor tenga varios
+	optional int32 bus_index = 16;
+	// Indica si el terminal debe activar el uso de banco para las huellas. Sólo aplica a terminales biométricos, todos los demás deben obviar el contenido de este campo.
+	optional bool is_fingerprint_slot_active = 17;
+	// Indica si el terminal es un terminal de presencia que está configurado en modo de funcionamiento autonomo.
+	optional bool is_standalone_active = 18;        
+        // Contador de errores del terminal. Indica cuantas tramas de respuesta del terminal han sido procesadas con errores
+        optional uint32 frame_errors = 19;
+        // Contador de timeouts del terminal. Indica cuantas tramas de enviadas al terminal no tuvieron respuesta
+        optional uint32 timeouts = 20;
+}
+
+// Entidad asociada a una lista de terminales
+message TerminalList {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// lista de terminales
+	repeated Terminal list = 2;
+}
+
+// Entidad asociada a un comando de passthrough que se envía
+// a un terminal desde el software a través del controlador.
+message PassThrough {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Timeout de espera de respuesta de la trama
+	optional uint32 timeout = 2;
+	// Array de bytes que contiene la trama a ser enviada o recibida
+	optional bytes frame = 3;
+	// Identificador único del terminal. Si no se envía se entiende que es una trama de broadcast.
+	optional int32 terminal_id = 4;
+}
+
+// Entidad asociada al reset de fábrica, necesario para poner a "cero"
+// el equipo como si hubiera salido de fábrica.
+message FactoryReset {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Indica si debe borrarse el registro de incidencias
+	required bool empty_log = 2;
+}
+
+//Entidad que se encarga de manipular los horarios
+message TimeWindow {
+	// Cabecera de todo mensaje
+	optional Bytech.Base.MessageHeader header = 1;
+	// Repetición de horas desde las 00:00 del día actual indicado en segundos
+	// siendo los pares inicio y los impares fin (el cero es par). Debe recibirse 
+	// siempre un número par
+	repeated uint32 intervals = 2;
+}
+
+//Entidad que se encarga de manipular los horarios
+message DateWindow {
+	// Cabecera de todo mensaje
+	optional Bytech.Base.MessageHeader header = 1;
+	// Fecha de inicio de la ventana de fechas
+	required uint32 start_date = 2;
+	// Fecha de fin de la ventana de fechas
+	required uint32 end_date = 3;
+}
+
+// Entidad que se utiliza para pedir una lista de identificadores de entidades. Se usa de forma genérica para poder operar con todo tipo de entidades. Hay una por cada paquete. Se puede usar sólo con los action Get y Remove para obtener todos y eliminar todos, respectivamente.
+message EntityList {
+	// Cabecera de todo mensaje
+	required Bytech.Base.MessageHeader header = 1;
+	// Tipo de entidad a consultar, es un valor del enumerador Accesscontrol.EntityType
+	required int32 entity_type = 2;
+	// Número de registros a omitir
+	required int32 skip = 3;
+	// Número de registros a devolver (como máximo)
+	required int32 take = 4;
+	// Indica si debe realizar la consulta en el controlador (true) o en los terminales (false)
+	required bool query_on_controller = 5;
+	// Indica el identificador del terminal en el que debe hacer la consulta. Sólo aplica si 'query_on_controller' tiene el valor 'false'
+	optional int32 terminal_id = 6;
+	// Lista de identificadores devueltos
+	repeated int32 entity_ids = 7;
+}
+
+// Entidad que se utiliza para marcar un changeset como procesado en el controlador. Es el único método por el que el contrador actualiza su changeset actual.
+message Changeset {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del changeset
+	required uint64 id = 2;	
+}
+
+// Entidad que se utiliza para marcar un cambio parcial dentro de un changeset. Sólo se mantiene en memoria.
+message ChangesetPart {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del changeset
+	required uint64 id = 2;	
+	// Identificador del orden del cambio
+	required uint32 order = 3;	
+	// Identificador del número de microtransacciones
+	required uint32 microtransactions_count = 4;	
+}
+
+//--SystemStatus--Entidad asociada al estado del sistema
+message SystemStatus {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Medida de las alimentaciones del sistema, codificadas en milivoltios
+	repeated uint32 power_voltages = 2;
+	// Medida de las baterías del sistema, codificadas en milivoltios
+	repeated uint32 batteries_voltages = 3;	
+	// Eatado de los terminales conectados al controlador, el primer int es el id y el segundo el estado
+	// representación entera de "enum TerminalStatusValues"
+	repeated int32 terminals = 4;		
+	// Eatado de las puertas conectadas al controlador, el primer int es el id y el segundo el estado
+	// representación entera de "enum DoorStatusValues"
+	repeated int32 doors = 5;	
+	// Estado de la zona APB. El primer int es el id, el segundo el tipo, el tercero el estado y el cuarto la ocupacion
+	repeated int32 apb_zone = 6;		
+}
+
+// Entidad que se usa para grabar datos en una tarjeta de forma genérica
+message WriteCard {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del terminal donde se va a realizar la grabación de la tarjeta
+	required int32 terminal_id = 2;
+	// Datos a grabar en la tarjeta. Deben ser múltiplo de 16 bytes.
+	required bytes data = 3;
+	// Número del primer bloque a grabar. Empieza en 0 y no se tienen en cuenta los bloques de triler.
+	required int32 block_id = 4;
+	// Clave A para autenticación, 6 bytes.
+	required bytes key_a = 5;
+	// Clave B para autenticación, 6 bytes.
+	required bytes key_b = 6;
+	// UID de la tarjeta a grabar, 8 bytes.
+	required bytes tag_code = 7;
+}
+
+// Entidad para cambiar las tarjetas que deben leer los terminales
+message ConfigureAcceptedCards {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Indica el tipo de tarjetas que aceptan los lectores de la instalación. Es un valor del enumerado AcceptedCards
+	required int32 cards_type = 2;
+}
+
+//--ControllerInfo--Entidad asociada a un terminal
+message ConfigureControllerMode {		
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Modo de funcionamiento del controlador. Es un valor del enumerado ControllerMode.
+	required uint32 controller_mode = 2;		
+}
+
+// Entidad para solicitar que un cargador de baterías realice un test de baterías
+message BatteryTest {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del terminal cargador de baterías
+	required int32 terminal_id = 2;		
+}
+
+// Entidad para reiniciar un terminal del controlador. Se envía con ActionReset
+message ResetTerminal {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del terminal a reiniciar
+	required int32 terminal_id = 2;		
+}
+
+// Entidad para cambiar la dirección IP de un terminal. Se envía ActionGet para obtener la configuración IP del terminal y ActionSet para cambiarla. De momento sólo soporta IPv4
+message ChangeTerminalIpSettings {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Identificador del terminal a reiniciar
+	required int32 terminal_id = 2;		
+	// Dirección IP del terminal
+	optional int32 ipV4_address = 3;
+	// Subred
+	optional int32 Subnet = 4;
+	// Puerta de enlace versión
+	optional int32 gipv4_gateway = 5;
+	// Dirección IP del servidor al que se tiene que conectar el terminal. Hace referencia a la dirección IP del EventController en instalaciones NÜO ONE.
+	optional int32 ipV4_server_address = 6;
+	// Puerto del servidor al que se tiene que conectar el terminal. Hace referencia al puerto del EventController en instalaciones NÜO ONE.
+	optional int32 server_port = 7;
+}
+
+// Entidad para cambiar el formato de las tarjetas que deben leer los terminales
+message ConfigureFormatCards {
+	// Cabecera de todo mensaje
+	required MessageHeader header = 1;
+	// Indica el formato de tarjetas que aceptan los lectores de la instalación. Es un valor del enumerado AcceptedCards
+	required int32 format_type = 2;
+}
+
+// This contract defines an intercontroller service
+message IntercontrollerService {
+    // Message header, mandatory for every message
+    required MessageHeader header = 1;
+    // Id of the service
+    required int32 id = 2;
+    // Service type
+    required int32 service_type = 3;
+    // Service name
+    optional string name = 4;
+    // Port of the Master controller, for any controller but master.
+    optional int32 master_ip_port = 5;
+    // IP of the Master controller, for any controller but master.
+    optional int32 master_ip_address = 6;
+}
+
+// This contract is used to link an intercontroller service with a controller
+message IntercontrollerServiceInfo {
+    // Message header, mandatory for every message
+    required MessageHeader header = 1;
+    // Id of the service
+    required int32 service_id = 2;
+    // Fixed addresses for the Master controller
+    optional int32 fixed_address = 3;
+}
+
+// Entidad para recibir y enviar ficheros al controlador
+message File {
+        // Cabecera de todo mensaje
+        required MessageHeader header = 1;
+        // Indica el nombre del fichero
+        required string name = 2;
+        // Indica el punto de inicio de lectura/escritura del fichero
+        required uint32 offset = 3;
+        // Indica el tamaño de lectura/escritura del fichero. si no se envía implica todo.
+        optional uint32 size = 4;
+        // Datos del fichero de lectura/escritura
+        optional bytes data = 5;
+}
+
+// Entidad para reiniciar un controlador. Se envía con ActionReset
+message ResetController {
+        // Cabecera de todo mensaje
+        required MessageHeader header = 1;
+}
+
+// Entidad para intercambio de claves SSH con un controlador
+message PublicKey {
+        // Cabecera de todo mensaje
+        required MessageHeader header = 1;
+        // id de la clave
+        required int32 id = 2;
+        // Clave
+        optional bytes key = 3;
+        // Tipo de la clave definido en PublicKeyType
+        optional int32 type = 4;
+}
+
+// Entidad para activar o desactivar el acceso mediante contraseña por SSH. Con el action Set
+// se bloquea el uso con contraseña, y con reset se permite
+message SshPasswordBlocking {
+        // Cabecera de todo mensaje
+        required MessageHeader header = 1;
+        // true si se habilita el acceso por password, false si se deshabilita
+        required bool enable_password = 2;
+}
+
+// Entidad para configurar la generación de códigos PIN de los terminales NÜO KEY conectados al controlador
+message ConfigureNuoKeyPinGenerator {
+        // Cabecera de todo mensaje
+        required MessageHeader header = 1;
+        // Semilla compartida entre los terminales y el SW para la generación de códigos PIN a partir de UID de tarjetas. La longitud debe ser siempre 16 bytes. Si la longitud es 0 se deshabilita la generación de códigos PIN.
+        required bytes seed = 2;
+        // Vector de conversión para dígitos del código PIN. La longitud es siempre 10 bytes. Si la longitud es 0 se deshabilita la generación de códigos PIN.
+        required bytes conversion_vector = 3;
+        // Longitud del PIN que se debe generar/validar. Los valores permitidos están entre 4 y 16. Si se indica 0 se deshabilita la generación de códigos PIN.
+        required int32 pin_lenght = 4;
+}

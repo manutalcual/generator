@@ -1,0 +1,81 @@
+/**
+ * Copyright (c) ByTech 2016
+ * \\file $item.cc
+ * \\author $usuario
+ * \\date $fecha
+ * 
+ */
+
+#include "\do lcase {${item}}.hh"
+
+
+$item::$item ()
+{
+    \for fields {bind ("%", _v%);
+    }
+}
+
+$item::~$item ()
+{
+}
+
+\for fields {%.type $item::% ()
+%\{
+    return _v%;
+%\}
+
+bool $item::% (%.type p%)
+%\{
+        _b%_set = true;
+	_v% = p%;
+%\}
+
+}
+
+bool $item::insert ()
+{
+    QString string;
+
+    string = "INSERT INTO $item (";
+    \for fields {
+    string.append ("%%?nolast{, }");
+    }
+    string.append (") VALUES (");
+
+    \for fields {
+    string.append (\if %.type == int {sys::itoa(_v% ) } {_v% }  );
+    %?nolast{
+    string.append (", "); }
+    }
+
+    string.append (")");
+
+    QSqlQuery query (string, _db);
+
+    return exec(query);
+}
+
+bool $item::update ()
+{
+    QString string;
+    string = "UPDATE $item set ";
+    \for fields {
+    string.append ("% = ");
+    string.append (\if %.type == int {sys::itoa(_v% )); } {"'" + _v%  + "'"); }
+    %?nolast{
+    string.append (", "); }
+    }
+
+    string.append (" WHERE Id = ");
+    string.append (sys::itoa(_Id));
+
+    QSqlQuery query (string, _db);
+
+    return exec(query);
+}
+
+bool $item::del ()
+{
+    QString string;
+    QSqlQuery query;
+}

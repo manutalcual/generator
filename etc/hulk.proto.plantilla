@@ -1,0 +1,59 @@
+// -------------------------------------------------------------------------
+//  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+//  You have been warned."
+// -------------------------------------------------------------------------
+
+syntax = "proto2";
+package Bytech.Hulk;
+import base.proto;
+import Hulk.enums.proto;
+
+message HulkFilter {
+    //
+    // Ranges delimited with semicolon (20140101;20150101)
+    // Bool: 0 false, 1 true
+    // Dates: YYYYMMDDHHMMSS
+    // Thousand separator: . (dot)
+    //
+    required string Field = 1;
+    required string ValueFrom = 2;
+    required string ValueTo = 3;
+}
+
+message BaseHeader {
+    required Bytech.Base.MessageHeader Header = 1;
+    optional string SessionId = 2;
+}
+
+message MessageExchange {
+    required BaseHeader Header = 1;
+}
+
+message HulkResult {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required Bytech.Base.Result Result = 2;
+}
+
+message HulkGetAll {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
+    repeated HulkFilter Filters = 3;
+}
+
+message HulkGetById {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
+    repeated int32 Id = 3;
+}
+
+message HulkDelete {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required int32 Id = 2;
+}
+
+\for $item {message % {
+\for fields {    \if %.not_null == true {required} {optional} % = %#;
+} %\}
+
+}
+

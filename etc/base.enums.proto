@@ -1,0 +1,339 @@
+package Bytech.Base.Enum;
+
+// Enumerado con los tipos de paquetes que se gestionan
+enum PackageType {		
+	Base = 0;		
+	Accesscontrol = 1;
+	Tabs = 2;
+        Hulk = 3;
+        Wmip = 4;
+}
+
+// Enumerado con los tipos de entidades
+enum EntityType {		
+	Unknown = 0;
+	ControllerInfo = 1;
+	Firmware = 2;
+	Time = 3;
+	DaylightSaving = 4;
+	Message = 5;		
+	Result = 6;
+	IpConfig = 7;	
+	ChannelIpConfig = 8;	
+	Header = 9;		
+	Terminal = 10;	
+	TerminalList = 11;		
+	SystemStatus = 12;
+	PassThrough = 13;
+	Signal = 14;
+	SequenceStep = 15;	
+	FactoryReset = 16;		
+	TimeWindow = 17;
+	DateWindow = 18;
+	EntityList = 19;
+	GetLogEntries = 20;
+	Changeset = 21;	
+	TerminalStatus = 22;	
+	DoorStatus = 23;
+	ChangesetPart = 24;
+	WriteCard = 25;
+	ConfigureAcceptedCards = 26;
+	ConfigureControllerMode = 27;
+	BatteryTest = 28;
+	ResetTerminal = 29;
+	ChangeTerminalIpSettings = 30;
+	ConfigureFormatCards = 31;
+        File = 32;
+        ResetController = 33;
+        IntercontrollerService = 34;
+        IntercontrollerServiceInfo = 35;
+	ConfigureNuoKeyPinGenerator = 36;
+        PublicKey = 37;
+        SshPasswordBlocking = 38;
+        MaxNumber = 39;
+}
+
+// Enumerado con los tipos de acciones
+enum ActionType {
+	ActionUnknown = 0;
+	ActionSet = 1;
+	ActionGet = 2;
+	ActionRemove = 3;
+	ActionUpdate = 4;		
+	ActionAccept = 5;
+	ActionReject = 6;
+	ActionInitSession = 7;
+	ActionDiscoverAll = 8;
+	ActionDiscoverNew = 9;
+	ActionTrigger = 10;	
+	ActionOpen = 11;
+	ActionBlock = 12;
+	ActionControlled = 13;
+	ActionReset = 14;
+	ActionStart = 15;
+	ActionStop = 16;
+	ActionFreeAccess = 17;	
+	ActionEmergency = 18;
+	ActionDisableEmergency = 19;
+	ActionSignal = 20;
+	ActionBiometricFullUpload = 21;
+	ActionBiometricFullDeletion = 22;
+	ActionArm = 23;
+	ActionDisarm = 24;
+	ActionUnblock = 25;
+}
+
+// Enumerado con los tipos de acciones
+enum CommonDefines {
+	AuthenticationKeySize = 16;	
+}
+
+// Enumerado con los códigos de error
+enum ResultCodes {
+	ResultOK = 0;
+	ResultNullPointer = -1;
+	ResultErrorUnpacking = -2;
+	ResultUnknownEntity = -3;
+	ResultOutOfSequence = -4;
+	ResultUnknownAction = -5;
+	ResultEntityFieldsError = -6;
+	ResultTimeout = -7;
+	ResultOutOfMemory = -8;
+	ResultProtocolError = -9;
+	ResultErrorPacking = -10;	
+	ResultErrorWritingDisk = -11;
+	ResultEntityNotFound = -12;
+	ResultEnrollmentActive = -13;
+	ResultTerminalNotFound = -14;	
+	ResultDoorNotFound = -15;
+	ResultUserNotFound = -16;
+	ResultGroupNotFound = -17;
+	ResultAPBNotFound = -18;
+	ResultErrorStartingFWUpload = -19;
+	ResultErrorFWPagesCount = -20;
+	ResultErrorProgrammingFWPage = -21;
+	ResultErrorEndingFWUpload = -22;
+        ResultErrorFileNotFound = -23;
+        ResultErrorOpeningFile = -24;
+        ResultErrorReadingFile = -25;
+}
+
+// Enumerado con los tipos de protocolo red
+enum NetworkProtocol {
+	IPv4 = 0;
+	IPv6 = 1;
+}
+
+// Enumerado con los tipos de canales de un dispositivo
+enum ChannelType {
+	Configuration = 0;
+	Events = 1;
+}
+
+// Enumerado con los tipos de producto
+enum ProductType {
+	ProductTypeUnknown = 0;
+	ProductTypeOneDoor = 1;	
+	ProductTypeSixDoors = 2;	
+	ProductTypeIom4I4O = 3;
+	ProductTypeOscar = 4;
+	ProductTypeNuoTag = 5;
+	ProductTypeNuoPI150 = 6;
+	ProductTypeNuoTagS = 7;	
+	ProductTypeNUOTagEditor = 18;
+	ProductTypeBshoEditor = 9;
+	ProductTypeBsho = 10;
+	ProductTypeNuoBioSwip = 11;
+	ProductTypeNuoBioTagSwip = 12;
+	ProductTypeNuoBioOpt = 13;
+	ProductTypeNuoBioTagOpt = 14;
+	ProductTypeV2 = 15;
+	ProductTypeWiliPlus = 16;
+	ProductTypeOscarSAM3 = 17;
+	ProductTypeNUORadioBase = 19;
+	ProductTypeNUORadioReader = 20;
+	ProductTypeFwUpdater = 21;
+	ProductTypeV2Bank = 22;
+	ProductTypeV2Company = 23;
+	ProductTypeNuoChic = 24;
+	ProductTypeNuoClass = 25;
+	ProductTypeNuoFlux = 26;
+	ProductTypeNuoSurf = 27;
+	ProductTypePi150Nuo = 28;
+	ProductTypePYT = 29;
+	ProductTypeWili2 = 30;
+	ProductTypeV2V16Console = 31;
+	ProductTypeWili = 32;
+	ProductTypeWiliSynth = 33;
+	ProductTypeV16 = 34;
+	// Editor autónomo NUO Mifare Plus
+	ProductTypeNuoEditorMFP = 35;	
+	ProductTypeSpiderLock = 36;
+	ProductTypeTT6 = 37;
+	ProductTypeNuoMatrik = 38;
+	ProductTypeDCi = 39;
+	ProductTypeDc1Plus = 40;
+	ProductTypeNUOChicEditor = 41;
+	ProductTypeNUOClasEditor = 42;
+	ProductTypeDc6Plus = 43;
+	ProductTypeIom10O = 44;
+	ProductTypeIom10I = 45;
+	ProductTypeNUOChicTime = 46;
+	ProductTypeNUOClasTime = 47;
+	ProductTypeNUOPass = 48;
+	ProductTypeNuoFlux4S = 49;
+	ProductTypePi150Nuo4S = 50;
+	ProductTypeNuoKey = 51;
+	ProductTypeSpiderMechanicTester = 52;
+	ProductTypeNuoKata = 53;
+	ProductTypeNuoId = 54;
+	ProductTypeTT2 = 55;
+	ProductTypeVoxterIPM4 = 56;
+	ProductTypeVoxterIPA9 = 57;
+	ProductTypeVideoConsoleIP = 58;
+	ProductTypeWiliIP = 59;
+	ProductTypeAudioVideoServerIP = 60;
+}
+
+// Enumerado con las reglas aplicables al DST
+enum DaylightSavingsRules {
+	// No se utiliza el sistema de cambio de hora
+	NotUsed = 0;
+	// Debe cambiarse el último día de la semana del mes
+	LastWeekDayOfMonth = 1;
+	// Cambio cunaod el día de la semana indicado es mayor que el día del mes
+	WeekDayGraterThanMonthDay = 2;
+	// Se utiliza la fecha explicita de la configuración
+	ActualDate = 3;
+}
+
+// Enumerado con los estados del terminal
+enum TerminalStatusValues {
+	// El terminal no se ha iniciado
+	TerminalNotInitiated = 0;
+	// El terminal está conectado y siendo sondeado correctamente.
+	TerminalConnected = 1;	
+	// El terminal está desconectado
+	TerminalDisconnected = 2;
+	// El terminal está desconectado en proceso de reconexión
+	TerminalConnectionTry = 3;
+	// El terminal está conectado y actualizando FW
+	TerminalUpdatingFW = 4;		
+	// El terminal está conectado y actualizando huellas
+	TerminalEnrolling = 5;
+	// El terminal está conectado y siendo sondeado pero en modo de enrolado remoto
+	TerminalRemoteEnroll = 6;	
+}
+
+// Enumerado con los estados de la puerta
+enum DoorStatusValues {
+	// El estado de la puerta es desconocido
+	DoorStatusUnknown = 0;	
+	// La puerta está cerrada, con el mecanismo de bloqueo activo
+	DoorStatusLocked = 1;
+	// La puerta está bloqueada, impidiendo el paso. Por menor prioridad 
+	// es por schedule.
+	DoorStatusBlockedBySchedule = 2;
+	// La puerta está desbloqueada para acceso libre. Por menor prioridad 
+	// es por schedule
+	DoorStatusFreeAccessBySchedule = 3;
+	// La puerta está entornada, con el mecanismo de bloqueo inactivo
+	DoorStatusUnlocked = 4;	
+	// La puerta está abierta
+	DoorStatusOpen = 5;		
+	// La puerta está forzada
+	DoorStatusForced = 6;			
+	// La puerta está en alarma de puerta abierta
+	DoorStatusOpenTimeExceeded = 7;
+	// La puerta está en estado de emergencia por SW
+	DoorStatusEmergencyBySoftware = 8;
+	// La puerta está bloqueada por una entrada hw, impidiendo el paso. 
+	DoorStatusBlockedByInput = 9;	
+	// La puerta está bloqueada por sw, impidiendo el paso. 
+	DoorStatusBlockedBySoftware = 10;		
+	// La puerta está desbloqueada para acceso libre por entrada
+	DoorStatusFreeAccessByInput = 11;	
+	// La puerta está desbloqueada para acceso libre por SW
+	DoorStatusFreeAccessbySW = 12;	
+	// La puerta está en estado de emergencia por entrada
+	DoorStatusEmergencyByInput = 13;	
+}
+
+// Enumerado con los tipos de lectores biométricos
+enum BiometricReaderType {
+	// Lector biométrico desconocido o sin lector biométrico
+	BiometricReaderTypeUknown = 0;
+	// Lector biométrico de Suprema
+	BiometricReaderTypeSuprema = 1;
+	// Lector biométrico de Authentec
+	BiometricReaderTypeAuthentec = 2;
+}
+
+// Enumerado con los estado de las entradas
+enum InputState {
+	// Estado de la entrada desconocido
+	InputStateUnknown = 0;
+	// Estado de la entrada activada
+	InputStateActive = 1;
+	// Estado de la entrada desactivada
+	InputStateInactive = 2;
+}
+
+// Enumerado con los estado de las salidas
+enum OutputState {
+	// Estado de la salida desconocido
+	OutputStateUnknown = 0;
+	// Estado de la salida activada
+	OutputStateActive = 1;
+	// Estado de la salida desactivada
+	OutputStateInactive = 2;
+}
+
+// Enumerado con los niveles de buzzer disponible para los terminales
+enum BuzzerLevel {
+	BuzzerLevelDefault = 0;
+	BuzzerLevelHigh = 1;
+	BuzzerLevelMute = 2;
+}
+
+// Enumerado con los tipos de funcionamiento de los terminales en cuanto al tipo de tarjetas que pueden leer
+enum AcceptedCards {
+	AcceptedCardsOnlyPlus = 0;
+	AcceptedCardsClassicAndPlus = 1;
+	AcceptedCardsFreeClassic = 2;
+	AcceptedCardsFreeClassicRenfe = 3;
+}
+
+// Enumerado con los tipos de modos de funcionamiento de un controlador de accesos
+enum ControllerMode {
+    ControllerModeDoors = 0;
+	ControllerModeTurnstile = 1;
+	ControllerModeParking = 2;
+	ControllerModeLift = 3;
+	ControllerModeApbMaster = 4;
+}
+
+// Enumerado con los tamaños de la memoria flash
+enum FlashCapacity {
+	Capacity16Mb = 0;
+	Capacity32Mb = 1;
+}
+
+enum ServiceType {
+	ServiceTypeUnknown = 0;
+	ServiceTypeAPB = 1;
+}
+
+// Enumerado con los modos de sincronización de las huellas del controlador
+enum SyncStatus {
+	SyncStatusUnknown = 0;
+	SyncStatusFinished = 1;
+	SyncStatusWorking = 2;
+	SyncStatusWorkingWithWarnings = 3;
+}
+
+// Enumerado con los tipos de clave pública que es capaz de gestionar el controlador
+enum PublicKeyType {
+        PublicKeyTypeUnknown = 0;
+        PublicKeyTypeSshRsa = 1;
+}

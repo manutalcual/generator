@@ -1,0 +1,46 @@
+/**
+ * Copyright (C) ByTech 2016
+ * \\file $item.h
+ * \\author $usuario
+ * \\date $fecha
+ * 
+ */
+
+#ifndef \do upcase {${item}}_H
+#define \do upcase {${item}}_H
+
+\for kk { }
+
+\for includes {#include "%"
+}
+
+#include "database.hh"
+
+/** 
+ * \\brief 
+ *
+ */
+class $item : public database
+{
+public:
+    $item ();
+    /// Destructor 
+    ~${item}();
+    \for fields {%.type % ();
+    bool % (%.type p%);
+    }
+    bool insert ();
+    bool update ();
+    bool del ();
+    // def. funciones acceso
+protected:
+private:
+    \for fields {%.type _v%;
+    bool _b%_set;
+    }
+};
+
+// impl. funciones acceso
+
+
+#endif // End \do upcase {${item}}_H
