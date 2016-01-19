@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-19 20:27:16 manuel>
+// Time-stamp: <2016-01-20 00:38:24 manuel>
 //
 //
 // Includes
@@ -15,25 +15,34 @@ namespace sys {
 					std::string clase,
                     sys::conf::block_t & bl)
         : _bloque (bl),
+		  _file (file_name),
+		  _size (_file.size()),
+          _str (_file[0]),
           _ok (false),
-          _str (""),
           _i (0),
-          _size (0),
           _clase (clase),
-		  _count (0),
-		  _current_count (0)
+		  _buf (""),
+		  _cur_scope (0)
     {
+        logp (sys::e_debug, "==========================================");
 		logp (sys::e_debug, "File name: " << file_name << ".");
-
-		sys::file f (file_name.c_str());
-
-        _str = f.data();
-        _size = f.size();
         logp (sys::e_debug, "El tamaño del archivo es de " << _size << " bytes.");
+		logp (sys::e_debug, "Pidiendo análisis.");
 
+		// First scope
+		
+		scope_t scope;
+		scope.block = &_bloque;
+		scope.begin = _bloque.subelements.begin();
+		scope.end = _bloque.subelements.end();
+		scope.count = _bloque.subelements.size();
+		scope.index = 1;
+		_scopes.push_back (scope);
+		
         _ok = analiza();
-        logp (sys::e_debug, "Resultado:");
+
         logp (sys::e_debug, "Se han recorrido " << _i << " bytes.");
+        nlogp (sys::e_debug, "Resultado:");
         nlogp (sys::e_debug, _buf);
         logp (sys::e_debug, "==========================================");
     }
@@ -52,6 +61,311 @@ namespace sys {
         return _buf;
     }
 
+	bool parser::analiza ()
+	{
+		_buf += escapa(_i);
+		return true;
+	}
+
+	std::string parser::escapa (int & i)
+	{
+		std::string word;
+		
+		word = escapa(i, '\0');
+
+		return word;
+	}
+
+	std::string parser::escapa (int & i, char ch)
+	{
+		std::string word;
+		
+		do {
+			switch (_str[i]) {
+			case '\\':
+				word += escape_slash(++i);
+				break;
+			case '$':
+				word += escape_var(++i);
+				break;
+			case '%':
+				word += escapa_field(++i);
+				break;
+			default:
+				word += _str[i++];
+				break;
+			}
+		} while (i < _size && (_str[i] != '\0' && _str[i] != ch));
+
+		return word;
+	}
+
+	std::string parser::escapa_field (int & i)
+	{
+		std::string word;
+		std::string command;
+		
+		if (_str[i] == '?') {
+			word = "?";
+			++i;
+			command = capture_word(i);
+		} else if (_str[i] == '.') {
+			++i;
+			command = capture_word(i);
+			word = _scopes[_cur_scope].block->values[command];
+		} else if (_str[i] == '#') {
+			std::string num;
+			int s = _scopes[_cur_scope].index; 
+			++i;
+			
+			if (_str[i] == '+') {
+				++i;
+				skip_blanks (i);
+				num = capture_num(i);
+				s += sys::atoi(num);
+			}
+			word = sys::itoa(s);
+		} else {
+			word = _scopes[_cur_scope].block->name;
+		}
+
+		return word;
+	}
+
+	std::string parser::escape_slash (int & i)
+	{
+		std::string word;
+		std::string command;
+		
+		if (_str[i] == '\\') {
+			word = "\\";
+			++i;
+		} else {
+			command = capture_word(i);
+			word = process_command(command, i);
+		}
+
+		return word;
+	}
+
+	std::string parser::process_command (std::string command, int & i)
+	{
+		std::string word;
+		
+		if (command == "for") {
+			word = process_for(i);
+		} else if (command == "do") {
+			word = process_do(++i);
+		} else if (command == "if") {
+			word = process_if(++i);
+		} else {
+			word = command;
+		}
+
+		return word;
+	}
+
+	std::string parser::process_if (int & i)
+	{
+		std::string subelem;
+		std::string word;
+		std::string op1;
+		std::string oper;
+		std::string op2;
+		
+		skip_blanks (i);
+		op1 = escapa(i, ' ');
+		skip_blanks (i);
+		oper = capture_oper(i);
+		skip_blanks (i);
+		op2 = escapa(i, ' ');
+		skip_blanks (i);
+
+		if (oper == "==") {
+			if (op1 == op2) {
+				++i; // skip '{'
+				word = escapa(i, '}');
+				++i; // skip '}'
+				skip_blanks (i);
+				if (_str[i] == '{')
+					skip_bloque (i);
+			} else {
+				skip_bloque (i);
+				skip_blanks (i);
+				++i; // skip '{'
+				word = escapa(i, '}');
+				++i; // skip '}'
+			}
+		} else if (oper == "!=") {
+			++i; // skip '{'
+			word = escapa(i);
+		}
+
+		return word;
+	}
+
+	std::string parser::process_for (int & i)
+	{
+		std::string subelem;
+		std::string word;
+		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
+		tblockite_t end = _scopes[_cur_scope].block->subelements.end();;
+
+		scope_t & cur_scope = _scopes[_cur_scope];
+
+		skip_blanks (i);
+
+		++i; // skip '{' that's a MUST
+
+		logp (sys::e_debug, "en for..... " << _cur_scope);
+
+		cur_scope.index = 0;
+		int last_pos = i;
+		for (; beg != end; ++beg) {
+			scope_t scope;
+			scope.block = beg->second;
+			scope.begin = beg;
+			scope.end = end;
+			scope.count = scope.block->subelements.size();
+			scope.index = ++cur_scope.index;
+			_scopes.push_back (scope);
+			++_cur_scope;
+
+			int pos = i;
+			word += escapa(pos, '}');
+			last_pos = pos;
+
+			_scopes.pop_back ();
+			--_cur_scope;
+		}
+		i = last_pos;
+		++i; // skip closing '}' a MUST
+		cur_scope.index = 0;
+
+		return word;
+	}
+
+	std::string parser::process_do (int & i)
+	{
+		sys::IComando * pcom = NULL;
+		std::string word;
+		std::string command;
+		std::string tmp;
+
+		command = capture_word(i);
+		pcom = sys::com::factoria(command);
+		if (pcom) {
+			sys::IComando & com = *pcom;
+
+			skip_blanks (i);
+			tmp = escapa(++i, '}');
+			++i; // skip '}'
+			com << tmp;
+			word = com.as_string();
+		}
+		return word;
+	}
+
+	std::string parser::capture_word (int & i)
+	{
+		std::string word;
+
+		do {
+			word += _str[i++];
+		} while (i < _size && (::isalnum(_str[i]) || _str[i] == '_'));
+
+		return word;
+	}
+
+	std::string parser::escape_var (int & i)
+	{
+		std::string word;
+
+		if (_str[i] == '{') {
+			word =  capture_until(i, '}');
+		} else {
+			word =  capture_word(i);
+		}
+
+		if (word == "usuario") {
+            word = sys::env::user();
+        } else if (word == "fecha") {
+            word = sys::date();
+        } else if (word == "_") {
+            word = _clase;
+        } else if (word == "") {
+            word = "";
+		} else {
+            word = sys::env::get(word);
+            if (word == "") {
+                word = _scopes[_cur_scope].block->values[word];
+            }
+        }
+
+		return word;
+	}
+
+	std::string parser::capture_until (int & i, char ch)
+	{
+		std::string word;
+
+		++i; // opening char
+		do {
+			word += _str[i++];
+		} while (i < _size && _str[i] != ch);
+		++i; // closing char
+
+		return word;
+	}
+
+	std::string parser::capture_oper (int & i)
+	{
+		std::string word;
+
+		do {
+			word += _str[i++];
+		} while (i < _size && ::ispunct(_str[i]));
+
+		return word;
+	}
+
+	std::string parser::capture_num (int & i)
+	{
+		std::string word;
+
+		do {
+			word += _str[i++];
+		} while (i < _size && ::isdigit(_str[i]));
+
+		return word;
+	}
+
+	void parser::skip_bloque (int & i)
+	{
+		flog ();
+		int llaves = 1;
+
+		++i; // Skip '{'
+		while (i < _size && llaves) {
+			if (_str[i] == '}') {
+				--llaves;
+			} else if (_str[i] == '{') {  
+				++llaves;
+			}
+			++i;
+		}
+	}
+
+	// ----------------------------------------------------------------
+
+
+	void parser::skip_blanks (int & i)
+	{
+		while (i < _size && ::isblank(_str[i]))
+			++i;
+	}
+	
+#if 0
     bool parser::analiza ()
     {
 		flog ();
@@ -657,12 +971,6 @@ namespace sys {
 		return false;
 	}
 	
-	void parser::skipBlanks (int & i)
-	{
-		while (i < _size && ::isblank(_str[i]))
-			++i;
-	}
-	
 	void parser::skipBloque (int & i)
 	{
 		flog ();
@@ -681,7 +989,7 @@ namespace sys {
 		}
 		logp (sys::e_debug, "Saltando bloque '" << _str[i] << "'.");
 	}
-	
+#endif	
 } // end namespace sys
 
 

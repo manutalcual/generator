@@ -41,6 +41,12 @@ namespace sys {
         return ch;
     }
 
+	int atoi (std::string num)
+	{
+		char ch[125];
+		return ::strtol(num.c_str(), NULL, 10);
+	}
+
 	std::string lower (std::string str)
 	{
 		std::string newstring (str);

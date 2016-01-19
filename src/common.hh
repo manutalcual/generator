@@ -149,6 +149,7 @@ namespace sys {
 	std::string lower (std::string str);
 	std::string upper (std::string str);
     std::string itoa (size_t num);
+    int atoi (std::string num);
 	void renove_log_files ();
     std::string date ();
 

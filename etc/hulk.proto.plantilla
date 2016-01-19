@@ -51,9 +51,11 @@ message HulkDelete {
     required int32 Id = 2;
 }
 
-\for $item {message % {
-\for fields {    \if %.not_null == true {required} {optional} % = %#;
-} %\}
 
+\for {message % {
+    required Bytech.Hulk.BaseHeader Header = 1;
+   \for { \if %.not_null == true {required} {optional} % = %#+1;
+   }
+\}
 }
 

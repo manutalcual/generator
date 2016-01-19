@@ -2,7 +2,7 @@
 // Clase: comandos Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Fri Apr  7 17:06:05 2006
-// Time-stamp: <2016-01-18 10:29:10 manuel>
+// Time-stamp: <2016-01-19 22:02:32 manuel>
 //
 //
 // Includes
@@ -15,7 +15,7 @@ namespace sys
     {
 		IComando * factoria (std::string nombre)
 		{
-			if (nombre == "upcase")
+			if (nombre == "ucase")
 				return new ucase;
 			else if (nombre == "lcase")
 				return new lcase;
@@ -50,7 +50,7 @@ namespace sys
     {
 		std::string b = sys::upper(buf);
 		_buf += b.c_str();
-		return buf;
+		return _buf;
     }
 
     std::string ucase::as_string ()
@@ -81,7 +81,7 @@ namespace sys
     {
 		std::string b = sys::lower(buf);
 		_buf += b.c_str();
-		return buf;
+		return _buf;
     }
 
     std::string lcase::as_string ()

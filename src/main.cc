@@ -104,12 +104,10 @@ int main (int argc, char ** argv)
 				std::string lib_name = data->values["gen"];
 				auto lib = conf.find("sys/" + lib_name);
 
-				/*
 				sys::parser proto ("../etc/hulk.proto.plantilla",
 								   lib->name,
 								   *lib);
-				std::cout << proto.resultado() << std::endl;
-				*/
+
 				auto begin = lib->subelements.begin();
 				auto end = lib->subelements.end();
 				for (; begin != end; ++begin) {
@@ -126,8 +124,8 @@ int main (int argc, char ** argv)
 									  
 					//std::cout << header.resultado() << std::endl;
 					std::cout << body.resultado() << std::endl;
-					break;
 				}
+				std::cout << proto.resultado() << std::endl;
 			}
 		}
 

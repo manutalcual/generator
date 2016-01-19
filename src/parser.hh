@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-18 15:41:26 manuel>
+// Time-stamp: <2016-01-20 00:37:26 manuel>
 //
 // Includes
 //
@@ -15,6 +15,7 @@
 
 #include "common.hh"
 #include "conf.hh"
+#include "map_file.hh"
 #include "comandos.hh"
 
 #ifndef parser_hh
@@ -23,17 +24,20 @@
 
 namespace sys {
 
+	typedef conf::block_t tblock_t;
+	typedef conf::block_t::mapblock_t::iterator tblockite_t;
 
 	class parser
 	{
         class scope_t {
         public:
-            sys::conf::block_t::mapblock_t::iterator beg;
-            sys::conf::block_t::mapblock_t::iterator end;
+			tblock_t * block;
+			tblockite_t begin;
+			tblockite_t end;
             size_t count;
             size_t index;
         };
-		typedef std::vector<size_t> vecscopes_t;
+		typedef std::vector<scope_t> vecscopes_t;
 		typedef std::vector<size_t> vecscope_cols_t;
 	public:
 		parser (std::string fname,
@@ -45,18 +49,41 @@ namespace sys {
 	protected:
 	private:
 		sys::conf::block_t & _bloque;
-		bool _ok;
-		std::string _str;
-		int _i;
+		sys::map_file _file;
 		int _size;
-		std::string _buf;
+		std::string _str;
+		bool _ok;
+		int _i;
 		std::string _clase;
+		std::string _buf;
+		size_t _cur_scope;
+		vecscopes_t _scopes;
+
+		bool analiza ();
+		std::string escapa (int & i);
+		std::string escapa (int & i, char ch);
+		std::string escapa_field (int & i);
+		std::string escape_slash (int & i);
+		std::string process_command (std::string command, int & i);
+		std::string process_if (int & i);
+		std::string process_for (int & i);
+		std::string process_do (int & i);
+		std::string capture_word (int & i);
+		std::string escape_var (int & i);
+		std::string capture_until (int & i, char ch);
+		std::string capture_oper (int & i);
+		std::string capture_num (int & i);
+		
+
+		void skip_blanks (int & i);
+		void skip_bloque (int & i);
+
+		/*
 		vecscopes_t _scopes;
         vecscope_cols_t _cur_col;
 		size_t _count;
 		size_t _current_count;
 
-		bool analiza ();
 		std::string escapa (int & i);
 		std::string escapa (sys::conf::block_t * blk, int & i);
 		std::string escapaComando (sys::conf::block_t * blk, int & i);
@@ -70,7 +97,6 @@ namespace sys {
 		std::string comandoWhile (sys::conf::block_t * blk, 
 								  std::string nom, int & i);
 
-		void skipBlanks (int & i);
 		void skipBloque (int & i);
 		std::string bloque (sys::conf::block_t * blk,
 							int & pos);
@@ -79,6 +105,7 @@ namespace sys {
 		std::string captureOperator (int & i);
 		bool resolveOperator (std::string op1, std::string ope, std::string op2);
 		bool resolveQuestion (sys::conf::block_t * blk, int & i);
+		*/
 	};
 
 } // end namespace sys
