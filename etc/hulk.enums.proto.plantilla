@@ -1,0 +1,43 @@
+// -------------------------------------------------------------------------
+// Do NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+// You have been warned.
+// -------------------------------------------------------------------------
+
+syntax = "proto2";
+package Bytech.Hulk.Enums;
+
+
+enum HulkActions {
+    GetAll = 1;
+    GetById = 2;
+    Insert = 3;
+    Update = 4;
+    Delete = 5;
+    Reject = 6;
+    Ok = 7;
+}
+
+enum HulkError {
+    ItemNotExist = 1;
+    CantInsert = 2;
+    TransactionFailure = 3;
+    MissingRequiredField = 4;
+    DeletionFailure = 5;
+}
+
+enum HulkSeverity {
+    Debug = 1;
+    Error = 2;
+    Critical = 3;
+    Info = 4;
+}
+
+enum HulkEntityType {
+    HulkGetAll = 1;
+    HulkGetById = 2;
+    HulkResult = 3;
+\for {    % = %#+3;
+}
+\for {    %List = %#+41;
+}
+}

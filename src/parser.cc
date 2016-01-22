@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-20 00:38:24 manuel>
+// Time-stamp: <2016-01-22 02:53:40 manuel>
 //
 //
 // Includes
@@ -22,7 +22,8 @@ namespace sys {
           _i (0),
           _clase (clase),
 		  _buf (""),
-		  _cur_scope (0)
+		  _cur_scope (0),
+		  _index (0)
     {
         logp (sys::e_debug, "==========================================");
 		logp (sys::e_debug, "File name: " << file_name << ".");
@@ -78,6 +79,7 @@ namespace sys {
 
 	std::string parser::escapa (int & i, char ch)
 	{
+		flog ();
 		std::string word;
 		
 		do {
@@ -97,27 +99,41 @@ namespace sys {
 			}
 		} while (i < _size && (_str[i] != '\0' && _str[i] != ch));
 
+		nlogp (sys::e_debug, "escaped: '" << word << "'.");
 		return word;
 	}
 
 	std::string parser::escapa_field (int & i)
 	{
+		flog ();
 		std::string word;
 		std::string command;
-		
+
+		logp (sys::e_debug, "escapa_field: " << _str[i] << ".");
 		if (_str[i] == '?') {
 			word = "?";
 			++i;
 			command = capture_word(i);
+			logp (sys::e_debug, "escaped command: "
+				  << command
+				  << ".");
 		} else if (_str[i] == '.') {
 			++i;
 			command = capture_word(i);
+			logp (sys::e_debug, "escaped field: "
+				  << command
+				  << ".");
 			word = _scopes[_cur_scope].block->values[command];
 		} else if (_str[i] == '#') {
 			std::string num;
 			int s = _scopes[_cur_scope].index; 
 			++i;
 			
+			logp (sys::e_debug, "escaped number: "
+				  << s
+				  << " "
+				  << _str[i]
+				  << ".");
 			if (_str[i] == '+') {
 				++i;
 				skip_blanks (i);
@@ -129,11 +145,13 @@ namespace sys {
 			word = _scopes[_cur_scope].block->name;
 		}
 
+		//skip_blanks (i);
 		return word;
 	}
 
 	std::string parser::escape_slash (int & i)
 	{
+		flog ();
 		std::string word;
 		std::string command;
 		
@@ -142,6 +160,7 @@ namespace sys {
 			++i;
 		} else {
 			command = capture_word(i);
+			logp (sys::e_debug, "Command to execute: " << command << ".");
 			word = process_command(command, i);
 		}
 
@@ -150,14 +169,36 @@ namespace sys {
 
 	std::string parser::process_command (std::string command, int & i)
 	{
+		flog ();
 		std::string word;
 		
+		skip_blanks (i);
 		if (command == "for") {
 			word = process_for(i);
 		} else if (command == "do") {
-			word = process_do(++i);
+			word = process_do(i);
+			skip_blanks (i);
 		} else if (command == "if") {
-			word = process_if(++i);
+			logp (sys::e_debug, "BEFORE IF '"
+				  << _str[i]
+				  << _str[i + 1]
+				  << _str[i + 2]
+				  << _str[i + 3]
+				  << "'");
+			word = process_if(i);
+			logp (sys::e_debug, "after IF '"
+				  << _str[i]
+				  << _str[i + 1]
+				  << _str[i + 2]
+				  << _str[i + 3]
+				  << "'");
+			skip_blanks (i);
+			logp (sys::e_debug, "AFTER IF '"
+				  << _str[i]
+				  << _str[i + 1]
+				  << _str[i + 2]
+				  << _str[i + 3]
+				  << "'");
 		} else {
 			word = command;
 		}
@@ -167,12 +208,19 @@ namespace sys {
 
 	std::string parser::process_if (int & i)
 	{
+		flog ();
 		std::string subelem;
 		std::string word;
 		std::string op1;
 		std::string oper;
 		std::string op2;
-		
+
+		logp (sys::e_debug, "IN IF '"
+			  << _str[i]
+			  << _str[i + 1]
+			  << _str[i + 2]
+			  << _str[i + 3]
+			  << "'");
 		skip_blanks (i);
 		op1 = escapa(i, ' ');
 		skip_blanks (i);
@@ -181,19 +229,51 @@ namespace sys {
 		op2 = escapa(i, ' ');
 		skip_blanks (i);
 
+		logp (sys::e_debug, "operators "
+			  << op1
+			  << oper
+			  << op2);
+
 		if (oper == "==") {
 			if (op1 == op2) {
+				logp (sys::e_debug, "if situation: "
+					  << _str[i]	
+					  << ". ");
 				++i; // skip '{'
 				word = escapa(i, '}');
+				logp (sys::e_debug, "if situation: '"
+					  << word
+					  << "', "
+					  << _str[i]	
+					  << ". ");
 				++i; // skip '}'
 				skip_blanks (i);
-				if (_str[i] == '{')
+				logp (sys::e_debug, "end of if situation: "
+					  << _str[i]	
+					  << ". ");
+				if (_str[i] == '{') {
 					skip_bloque (i);
+				}
+				
+				logp (sys::e_debug, "** end of if situation: "
+					  << _str[i]	
+					  << ". ");
 			} else {
 				skip_bloque (i);
 				skip_blanks (i);
+				logp (sys::e_debug, "if situation: "
+					  << _str[i]	
+					  << ". ");
 				++i; // skip '{'
+				logp (sys::e_debug, "end of if situation: "
+					  << _str[i]	
+					  << ". ");
 				word = escapa(i, '}');
+				logp (sys::e_debug, "if situation: '"
+					  << word
+					  << "', "
+					  << _str[i]	
+					  << ". ");
 				++i; // skip '}'
 			}
 		} else if (oper == "!=") {
@@ -206,6 +286,7 @@ namespace sys {
 
 	std::string parser::process_for (int & i)
 	{
+		flog ();
 		std::string subelem;
 		std::string word;
 		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
@@ -247,6 +328,7 @@ namespace sys {
 
 	std::string parser::process_do (int & i)
 	{
+		flog ();
 		sys::IComando * pcom = NULL;
 		std::string word;
 		std::string command;
@@ -268,6 +350,7 @@ namespace sys {
 
 	std::string parser::capture_word (int & i)
 	{
+		flog ();
 		std::string word;
 
 		do {
@@ -279,6 +362,7 @@ namespace sys {
 
 	std::string parser::escape_var (int & i)
 	{
+		flog ();
 		std::string word;
 
 		if (_str[i] == '{') {
@@ -322,10 +406,11 @@ namespace sys {
 	{
 		std::string word;
 
+		logp (sys::e_debug, "entering operator capturing: " << _str[i]);
 		do {
 			word += _str[i++];
 		} while (i < _size && ::ispunct(_str[i]));
-
+		logp (sys::e_debug, "operator captured: " << word);
 		return word;
 	}
 
@@ -343,10 +428,12 @@ namespace sys {
 	void parser::skip_bloque (int & i)
 	{
 		flog ();
+		std::string word;
 		int llaves = 1;
 
 		++i; // Skip '{'
 		while (i < _size && llaves) {
+			word += _str[i];
 			if (_str[i] == '}') {
 				--llaves;
 			} else if (_str[i] == '{') {  
@@ -354,16 +441,21 @@ namespace sys {
 			}
 			++i;
 		}
+		logp (sys::e_debug, "SKIPED: '" << word << "', " << _str[i] << ".");
 	}
 
-	// ----------------------------------------------------------------
 
 
 	void parser::skip_blanks (int & i)
 	{
-		while (i < _size && ::isblank(_str[i]))
-			++i;
+		std::string word;
+		while (i < _size && (::isblank(_str[i]) /* || _str[i] == '\n' */))
+			word += _str[i++];
+
+		logp (sys::e_debug, "BLANK '" << word << "'");
 	}
+
+	// ----------------------------------------------------------------
 	
 #if 0
     bool parser::analiza ()

@@ -31,6 +31,14 @@ sys::opt::opt_t options[] = {
         "Configuration file to load.", "hulk.conf"
     },
     {
+        'c', "class", NULL, sys::opt::e_optional, 0,
+        "Configuration file to load.", "hulk.conf"
+    },
+    {
+        'o', "output", NULL, sys::opt::e_optional, 0,
+        "Configuration file to load.", "hulk.conf"
+    },
+    {
         NULL
     }
 };
@@ -96,7 +104,6 @@ int main (int argc, char ** argv)
 		sys::conf::block_t::mapblock_t::
 			iterator ite = sub->subelements.end();
 
-
 		for (; itb != ite; ++itb) {
 			auto data = itb->second;
 			if (data->values["type"] == "lib") {
@@ -104,28 +111,78 @@ int main (int argc, char ** argv)
 				std::string lib_name = data->values["gen"];
 				auto lib = conf.find("sys/" + lib_name);
 
-				sys::parser proto ("../etc/hulk.proto.plantilla",
-								   lib->name,
-								   *lib);
+				/*
+				sys::parser proto_text ("../etc/hulk.enums.proto.plantilla",
+										lib->name,
+										*lib);
+
+				std::string pname ("generated/hulk.enums.proto");
+				sys::stat_t stat_proto (pname);
+
+				if (stat_proto) {
+					sys::file_system::safe_mv (pname, pname + ".old");
+				}
+
+				std::ofstream proto (pname);
+				if (! proto.is_open()) {
+					logp (sys::e_crit, "NO PROTO FILE!!! " << pname);
+					throw "Can't create proto file";
+				}
+
+				std::cout << proto_text.resultado() << std::endl;
+				proto << proto_text.resultado();
+
+				return 0;
+				*/
 
 				auto begin = lib->subelements.begin();
 				auto end = lib->subelements.end();
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-					/*
-					sys::parser header ("../etc/entity.header.plantilla",
-										item->name,
-										*item);
-										*/
-					sys::parser body ("../etc/entity.body.plantilla",
-									  item->name,
-									  *item);
+					
+					sys::parser header_text ("../etc/business.header.plantilla",
+											 item->name,
+											 *(item->subelements.begin()->second));
+
+					std::string hname ("generated/" + sys::lower(item->name) + "businessbase.h");
+					sys::stat_t stat_header (hname);
+
+					if (stat_header) {
+						sys::file_system::safe_mv (hname, hname + ".old");
+					}
+
+					std::ofstream header (hname);
+					if (! header.is_open()) {
+						logp (sys::e_crit, "NO HEADER FILE!!! " << hname);
+						throw "Can't create header file";
+					}
+
+					header << header_text.resultado();
+					std::cout << header_text.resultado() << std::endl;
+
+					// ----
+					sys::parser body_text ("../etc/business.body.plantilla",
+										   item->name,
+										   *item);
 									  
-					//std::cout << header.resultado() << std::endl;
-					std::cout << body.resultado() << std::endl;
+
+					std::string bname ("generated/" + sys::lower(item->name) + "businessbase.cpp");
+					sys::stat_t stat_body (bname);
+
+					if (stat_body) {
+						sys::file_system::safe_mv (bname, bname + ".old");
+					}
+
+					std::ofstream body (bname);
+					if (! body.is_open()) {
+						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
+						throw "Can't create body file";
+					}
+
+					body << body_text.resultado();
+					std::cout << body_text.resultado() << std::endl;
 				}
-				std::cout << proto.resultado() << std::endl;
 			}
 		}
 

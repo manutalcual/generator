@@ -1,0 +1,349 @@
+//
+//
+//
+#include "\do lcase {${_}}businessbase.h"
+
+
+const char * const g_err = "Controller doesn't exist";
+
+
+${_}BusinessBase::${_}BusinessBase(QSharedPointer<qx::QxSession> session)
+    : _session(session)
+{
+    if (_session.isNull())
+    {
+        logp("Session is null");
+        _session.reset(new qx::QxSession);
+    }
+}
+
+QSqlError ${_}BusinessBase::InsertItem(${_} &controller,
+        const QSharedPointer<qx::QxSession> &session)
+{
+    QSqlError error;
+    QSharedPointer<qx::QxSession> sessionlocal;
+
+    if (!session.isNull())
+    {
+        sessionlocal = session;
+    }
+
+    error = sessionlocal->insert(controller);
+    if (error.isValid())
+    {
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber((int)ByHulkEnum::HulkError::CantInsert);
+        return error;
+    }
+    return error;
+}
+
+QByteArray ${_}BusinessBase::Insert(const QByteArray &params)
+{
+    flog();
+    QByteArray response;
+    ${_} itemEntity;
+    Bytech::Hulk::${_} itemProto;
+    QSqlError error;
+
+    ProtoBuf::Deserialize(params, itemProto);
+    proto_to_db(itemProto, itemEntity);
+    error = InsertItem(itemEntity, _session);
+    if (error.isValid())
+    {
+        Bytech::Hulk::HulkResult *result = createResultError(
+            Bytech::Hulk::Enums::HulkEntityType::${_});
+        response = ProtoBuf::Serialize(*result);
+    }
+    else
+    {
+        response = ProtoBuf::Serialize(itemProto);
+    }
+    return response;
+}
+
+
+QByteArray ${_}BusinessBase::GetAll(const QByteArray &params)
+{
+    flog();
+    QByteArray response;
+    ${_} itemEntity;
+    Bytech::Hulk::${_}List listProto;
+    list_of_${_} list;
+
+
+    Bytech::Hulk::BaseHeader *res = createHeaderGetAll(
+                                        Bytech::Hulk::Enums::HulkEntityType::${_}List);
+    listProto.set_allocated_header(res);
+
+    Bytech::Hulk::HulkResult *hres = createResultGetAll(
+                                         Bytech::Hulk::Enums::HulkEntityType::${_});
+    listProto.set_allocated_result(hres);
+
+    long lCount = 0;
+    itemEntity.qxCount(lCount);
+    logp("Count: " << lCount << ".");
+
+    itemEntity.qxFetchAll(list);
+
+    auto b = list.begin();
+    auto e = list.end();
+    for (; b != e; ++b)
+    {
+        Bytech::Hulk::${_} *item = listProto.add_list();
+        Bytech::Hulk::BaseHeader *bs = createHeaderGetAll(
+                                           Bytech::Hulk::Enums::HulkEntityType::${_}List);
+
+        item->set_allocated_header(bs);
+        db_to_proto(*b->second, *item);
+    }
+
+    response.resize(listProto.ByteSize());
+    listProto.SerializeToArray(response.data(), listProto.ByteSize());
+
+    return response;
+}
+
+QByteArray ${_}BusinessBase::GetById(const QByteArray &params)
+{
+    flog();
+    QByteArray response;
+    QByteArray request;
+    ${_} itemEntity;
+    Bytech::Hulk::HulkGetById getById;
+    Bytech::Hulk::${_} itemProto;
+
+    request.resize(params.size());
+    getById.ParseFromArray(params, params.size());
+
+    Bytech::Hulk::BaseHeader *res = createHeaderGetById(
+                                        Bytech::Hulk::Enums::HulkEntityType::${_});
+    itemProto.set_allocated_header(res);
+
+    logp("Get id " << getById.id());
+    itemEntity.setId(getById.id());
+  
+    if (!itemEntity.qxExist(QVariant::fromValue(itemEntity.getId())))
+    {
+        QSqlError error;
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber((int)ByHulkEnum::HulkError::ItemNotExist);
+        _errors.append(error);
+        return params;
+    }
+
+    itemEntity.qxFetchById();
+    logp("Count: " << getById.id() << ".");
+
+    db_to_proto(itemEntity, itemProto);
+
+    response.resize(itemProto.ByteSize());
+    itemProto.SerializeToArray(response.data(), itemProto.ByteSize());
+    return response;
+}
+
+
+QByteArray ${_}BusinessBase::Update(const QByteArray &params)
+{
+    flog();
+    QByteArray response;
+    ${_} itemEntity;
+    Bytech::Hulk::${_} updateProto;
+
+    updateProto.ParseFromArray(params, params.size());
+
+    logp("Get id " << updateProto.id());
+    itemEntity.setId(updateProto.id());
+    QSqlError error = itemEntity.qxFetchById();
+    if (!error.isValid())
+    {
+        proto_to_db(updateProto, itemEntity);
+        itemEntity.qxUpdate();
+    }
+
+    response.resize(updateProto.ByteSize());
+    updateProto.SerializeToArray(response.data(), updateProto.ByteSize());
+    return response;
+}
+
+//
+// Delete
+//
+QByteArray ${_}BusinessBase::Delete(const QByteArray &params)
+{
+    flog();
+    QByteArray response;
+    Bytech::Hulk::HulkDelete itemProto;
+
+    itemProto.ParseFromArray(params, params.size());
+    logp("Id: " << itemProto.id() << ".");
+
+    QSqlError error = DeleteItem(itemProto.id(), _session);
+    if (error.isValid())
+    {
+        logp("Error: " << error.text());
+        Bytech::Hulk::HulkResult * result = get_errors_proto();
+        logp("Resul size: '" << result->ByteSize() << "'.");
+        response.resize(result->ByteSize());
+        result->SerializeToArray(response.data(), result->ByteSize());
+    }
+    else
+    {
+        logp("Delete Success.");
+        QSharedPointer<Bytech::Hulk::HulkResult> result (createResultOk(
+                                                             ByHulkEnum::HulkEntityType::${_}));
+
+        response.resize(result->ByteSize());
+        result->SerializeToArray(response.data(), result->ByteSize());
+    }
+
+    return response;
+}
+
+QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxSession> &session)
+{
+    QSqlError error;
+
+    QSharedPointer<qx::QxSession> sessionlocal;
+    if (!session.isNull())
+    {
+        sessionlocal = session;
+    }
+
+    ${_} controller;
+    if (!controller.qxExist(QVariant::fromValue(id)))
+    {
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber((int)ByHulkEnum::HulkError::ItemNotExist);
+        error.setDatabaseText(g_err);
+        _errors.append(error);
+        return error;
+    }
+
+    TerminalsBusiness terminals_business(session);
+    ${_}::type_list_of_Terminals terminal_list;
+    auto begin = terminal_list.begin();
+    auto end = terminal_list.end();
+
+    for(; begin != end; ++begin)
+    {
+        QSqlError error = terminals_business.DeleteItem((int)begin->second->getId(), sessionlocal);
+        if (error.isValid())
+        {
+            _errors.append(error);
+        }
+    }
+
+    controller.setId(id.toInt());
+    sessionlocal->deleteById(controller);
+
+    if (!sessionlocal->isValid()) {
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber((int)ByHulkEnum::HulkError::TransactionFailure);
+    }
+
+    return error;
+}
+
+
+//
+// Error reporting
+//
+
+Bytech::Hulk::HulkResult * ${_}BusinessBase::get_errors_proto()
+{
+    flog();
+    Bytech::Hulk::HulkResult * result = createResultError(
+        Bytech::Hulk::Enums::HulkEntityType::${_});
+
+    auto begin = _errors.begin();
+    auto end = _errors.end();
+
+    for (; begin != end; ++begin) {
+        QSqlError & item = *begin;
+        Bytech::Hulk::HulkError * err = result->add_errors();
+
+        switch (item.number()) {
+        case Bytech::Hulk::Enums::HulkError::ItemNotExist:
+        case Bytech::Hulk::Enums::HulkError::CantInsert:
+        case Bytech::Hulk::Enums::HulkError::TransactionFailure:
+        case Bytech::Hulk::Enums::HulkError::MissingRequiredField:
+        case Bytech::Hulk::Enums::HulkError::DeletionFailure:
+        default:
+            createError (err,
+                         Bytech::Hulk::Enums::HulkSeverity::Error,
+                         (Bytech::Hulk::Enums::HulkError)item.number(),
+                         item.databaseText());
+            break;
+        }
+    }
+
+    return result;
+}
+
+
+//
+// ------ Proto to db & db to Proto --------
+//
+
+void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
+{
+    QSqlError error;
+\for {
+\for {
+    // % (not null \if %.not_null == yes {YES } {NO } )
+    logp("Has % ? " << proto.has_\do lcase {% } ());
+    if (! proto.has_\do lcase {% }())
+    {
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber(Bytech::Hulk::Enums::HulkError::MissingRequiredField);
+        _errors.append(error);
+    \}
+    else
+    { // %.type
+        logp("%");
+    \if %.type == nvarchar {QString str_% = QString::fromStdString(proto.\do lcase {%}());
+    db.set% (str_%);
+    } { }
+    \if %.type == integer {long long_% = proto.\do lcase {%}();
+    db.set% (long_%);
+    } { }
+    \if %.type == datetime {QDateTime datetime_% = proto.\do lcase {%}();
+    db.set% (datetime_%);
+    } { }
+    \if %.type == blob {char * blob_% = proto.\do lcase {%}();
+    db.set% (blob_%);
+    } { }
+    \if %.type == bit {char * bit_% = proto.\do lcase {%}();
+    db.set% (bit_%);
+    } { }
+    \}
+    }
+}
+
+
+void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
+{
+\for {
+    \for { // %
+    \if %.type == nvarchar {std::string str_% = QString::toStdString(db.get%());
+    proto.set_\do lcase {%} (str_%);
+    } { }
+    \if %.type == integer {long long_% = db.get%();
+    proto.set_\do lcase {%} (long_%);
+    } { }
+    \if %.type == datetime {long datetime_% = db.get%();
+    proto.set_\do lcase {%} (datetime_%);
+    } { }
+    \if %.type == blob {char * blob_% = db.get%();
+    proto.set_\do lcase {%} (blob_%);
+    } { }
+    \if %.type == bit {char * bit_% = db.get%();
+    proto.set_\do lcase {%} (bit_%);
+    } { }
+	}
+}
+
+
+
+

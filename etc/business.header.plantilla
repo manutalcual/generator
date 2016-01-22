@@ -1,0 +1,53 @@
+//
+// Includes
+//
+#ifndef \do ucase {${_}}BUSINESSBASE_H
+#define \do ucase {${_}}BUSINESSBASE_H
+
+#include <vector>
+#include <QDebug>
+#include <QByteArray>
+#include <QList>
+
+#include <ByProtos>
+#include <ByEntities>
+
+#include "entityprocessbase.h"
+#include "requestparams.h"
+#include "bymodule.h"
+#include "createheader.h"
+
+
+class ${_}BusinessBase: public EntityProcessBase<Bytech::Hulk::${_}>
+{
+protected:
+    typedef QByteArray(${_}BusinessBase::*ProcessAction)(const QByteArray &params);
+    QHash<ByBaseEnum::ActionType, ProcessAction> _processorCustomActions;
+
+public:
+    ${_}BusinessBaseBase(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
+
+	// Insert
+    QSqlError InsertItem(${_} & \do lcase {${_}},
+    	      const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
+	// Delete
+    QSqlError DeleteItem(QVariant id, const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
+	// 
+
+    QByteArray Insert(const QByteArray &params);
+    QByteArray GetAll(const QByteArray &params);
+    QByteArray GetById(const QByteArray &params);
+    QByteArray Update(const QByteArray &params);
+    QByteArray Delete(const QByteArray &params);
+
+private:
+    QSharedPointer<qx::QxSession> _session;
+    //Bytech::Hulk::Controllers _proto;
+    QList<QSqlError> _errors;
+
+    Bytech::Hulk::HulkResult * get_errors_proto ();
+    void proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db);
+    void db_to_proto(${_} &db, Bytech::Hulk::${_} &proto);
+
+};
+#endif // \do ucase{${_}}BUSINESSBASE_H

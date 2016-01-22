@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-20 00:37:26 manuel>
+// Time-stamp: <2016-01-22 00:05:41 manuel>
 //
 // Includes
 //
@@ -36,6 +36,12 @@ namespace sys {
 			tblockite_t end;
             size_t count;
             size_t index;
+
+			scope_t ()
+				: block (0),
+				  count (0),
+				  index (0)
+				{}
         };
 		typedef std::vector<scope_t> vecscopes_t;
 		typedef std::vector<size_t> vecscope_cols_t;
@@ -58,6 +64,7 @@ namespace sys {
 		std::string _buf;
 		size_t _cur_scope;
 		vecscopes_t _scopes;
+        size_t _index;
 
 		bool analiza ();
 		std::string escapa (int & i);

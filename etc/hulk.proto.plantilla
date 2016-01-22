@@ -5,8 +5,8 @@
 
 syntax = "proto2";
 package Bytech.Hulk;
-import base.proto;
-import Hulk.enums.proto;
+import "base.proto";
+import "hulk.enums.proto";
 
 message HulkFilter {
     //
@@ -29,9 +29,16 @@ message MessageExchange {
     required BaseHeader Header = 1;
 }
 
+message HulkError {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required Bytech.Hulk.Enums.HulkSeverity Severity = 2;
+    required Bytech.Hulk.Enums.HulkError ErrorCode = 3;
+    required string ErrorDescription = 4;       
+}
+
 message HulkResult {
     required Bytech.Hulk.BaseHeader Header = 1;
-    required Bytech.Base.Result Result = 2;
+    repeated HulkError Errors = 2;
 }
 
 message HulkGetAll {
@@ -43,19 +50,26 @@ message HulkGetAll {
 message HulkGetById {
     required Bytech.Hulk.BaseHeader Header = 1;
     required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
-    repeated int32 Id = 3;
+    required int32 Id = 3;
 }
 
 message HulkDelete {
     required Bytech.Hulk.BaseHeader Header = 1;
-    required int32 Id = 2;
+    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
+    required int32 Id = 3;
 }
-
 
 \for {message % {
     required Bytech.Hulk.BaseHeader Header = 1;
-   \for { \if %.not_null == true {required} {optional} % = %#+1;
-   }
+\for {    optional \if %.type == nvarchar {string} { } \if %.type == integer {int32} { } \if %.type == datetime {long } { } \if %.type == long {long} { } \if %.type == blob {bytes} { } \if %.type == bit {long } { } % = %#+1;
+} \}
+}
+
+\for {message %List {
+    required Bytech.Hulk.BaseHeader Header = 1;
+    required Bytech.Hulk.HulkResult Result = 2;
+    repeated % List = 3;
 \}
 }
+
 
