@@ -111,12 +111,30 @@ int main (int argc, char ** argv)
 				std::string lib_name = data->values["gen"];
 				auto lib = conf.find("sys/" + lib_name);
 
-				/*
-				sys::parser proto_text ("../etc/hulk.enums.proto.plantilla",
+#if 1
+				sys::parser indice_text ("../etc/web.index.plantilla",
+										 lib->name,
+										 *lib);
+
+				std::string pname ("generated/index.html");
+				sys::stat_t stat_indice (pname);
+
+				std::ofstream indice (pname);
+				if (! indice.is_open()) {
+					logp (sys::e_crit, "NO INDICE FILE!!! " << pname);
+					throw "Can't create indice file";
+				}
+
+				std::cout << indice_text.resultado() << std::endl;
+				indice << indice_text.resultado();
+#endif
+
+#if 0
+				sys::parser proto_text ("../etc/hulk.proto.plantilla",
 										lib->name,
 										*lib);
 
-				std::string pname ("generated/hulk.enums.proto");
+				std::string pname ("generated/hulk.proto");
 				sys::stat_t stat_proto (pname);
 
 				if (stat_proto) {
@@ -133,14 +151,14 @@ int main (int argc, char ** argv)
 				proto << proto_text.resultado();
 
 				return 0;
-				*/
+#endif
 
 				auto begin = lib->subelements.begin();
 				auto end = lib->subelements.end();
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-					
+#if 0
 					sys::parser header_text ("../etc/business.header.plantilla",
 											 item->name,
 											 *(item->subelements.begin()->second));
@@ -182,6 +200,25 @@ int main (int argc, char ** argv)
 
 					body << body_text.resultado();
 					std::cout << body_text.resultado() << std::endl;
+#endif
+#if 1
+					sys::parser body_text ("../etc/web.plantilla",
+										   item->name,
+										   *item);
+									  
+
+					std::string bname ("generated/" + sys::lower(item->name) + ".html");
+					sys::stat_t stat_body (bname);
+
+					std::ofstream body (bname);
+					if (! body.is_open()) {
+						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
+						throw "Can't create body file";
+					}
+
+					body << body_text.resultado();
+					std::cout << body_text.resultado() << std::endl;
+#endif
 				}
 			}
 		}

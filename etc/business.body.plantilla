@@ -219,7 +219,7 @@ QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxS
         _errors.append(error);
         return error;
     }
-
+#if 0
     TerminalsBusiness terminals_business(session);
     ${_}::type_list_of_Terminals terminal_list;
     auto begin = terminal_list.begin();
@@ -233,7 +233,7 @@ QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxS
             _errors.append(error);
         }
     }
-
+#endif
     controller.setId(id.toInt());
     sessionlocal->deleteById(controller);
 
@@ -292,7 +292,6 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 \for {
 \for {
     // % (not null \if %.not_null == yes {YES } {NO } )
-    logp("Has % ? " << proto.has_\do lcase {% } ());
     if (! proto.has_\do lcase {% }())
     {
         error.setType(QSqlError::ErrorType::UnknownError);
@@ -301,21 +300,21 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
     \}
     else
     { // %.type
-        logp("%");
     \if %.type == nvarchar {QString str_% = QString::fromStdString(proto.\do lcase {%}());
     db.set% (str_%);
     } { }
     \if %.type == integer {long long_% = proto.\do lcase {%}();
     db.set% (long_%);
     } { }
-    \if %.type == datetime {QDateTime datetime_% = proto.\do lcase {%}();
+    \if %.type == datetime {QDateTime datetime_%;
+    datetime_% .setTime_t(proto.\do lcase {%}());
     db.set% (datetime_%);
     } { }
     \if %.type == blob {char * blob_% = proto.\do lcase {%}();
-    db.set% (blob_%);
+    db.set% (QByteArray(blob_%));
     } { }
-    \if %.type == bit {char * bit_% = proto.\do lcase {%}();
-    db.set% (bit_%);
+    \if %.type == bit {bool bit_% = proto.\do lcase {%}();
+    db.set% (QVariant(bit_%));
     } { }
     \}
     }
@@ -326,22 +325,22 @@ void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
 {
 \for {
     \for { // %
-    \if %.type == nvarchar {std::string str_% = QString::toStdString(db.get%());
+    \if %.type == nvarchar {std::string str_% = db.get%().toStdString();
     proto.set_\do lcase {%} (str_%);
     } { }
     \if %.type == integer {long long_% = db.get%();
     proto.set_\do lcase {%} (long_%);
     } { }
-    \if %.type == datetime {long datetime_% = db.get%();
-    proto.set_\do lcase {%} (datetime_%);
+    \if %.type == datetime {QDateTime datetime_% = db.get%();
+    proto.set_\do lcase {%} (datetime_% .toTime_t());
     } { }
-    \if %.type == blob {char * blob_% = db.get%();
-    proto.set_\do lcase {%} (blob_%);
+    \if %.type == blob {QByteArray blob_% = db.get%();
+    proto.set_\do lcase {%} (blob_% .data());
     } { }
-    \if %.type == bit {char * bit_% = db.get%();
-    proto.set_\do lcase {%} (bit_%);
+    \if %.type == bit {QVariant bit_% = db.get%();
+    proto.set_\do lcase {%} (bit_% .toBool());
     } { }
-	}
+    }
 }
 
 
