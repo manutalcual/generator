@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-23 12:06:18 manuel>
+// Time-stamp: <2016-01-23 12:11:48 manuel>
 //
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -293,7 +293,7 @@ namespace sys {
 
     bool conf::is_comment ()
     {
-        if (_data[_idx] == '#')
+        if (_data[_idx] == '/' && _data[_idx + 1] == '/')
             return true;
 
         return false;
@@ -304,7 +304,7 @@ namespace sys {
         nflog ();
         base_parser::skip_blanks ();
 
-        while (_data[_idx] == '#') {
+        while (is_comment()) {
             skip_to ('\n');
             ++_idx; // skip '\n' itself
 			base_parser::skip_blanks ();
