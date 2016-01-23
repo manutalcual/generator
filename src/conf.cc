@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-23 12:11:48 manuel>
+// Time-stamp: <2016-01-23 12:36:55 manuel>
 //
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -207,6 +207,9 @@ namespace sys {
 
             incr (); //++_idx; // skip '}'
             --_scope;
+		} else if (match('/')) {
+			if (is_comment())
+				skip_comments ();
         } else if (_idx >= _size) {
             return;
         } else {
@@ -293,6 +296,14 @@ namespace sys {
 
     bool conf::is_comment ()
     {
+		if (_data[_idx] == '/' && _data[_idx + 1] == '*') {
+			do {
+				++_idx;
+			} while (! (_data[_idx] == '*' && _data[_idx + 1] == '/'));
+			_idx += 2; // skip '*/'
+			return false;
+		}
+		
         if (_data[_idx] == '/' && _data[_idx + 1] == '/')
             return true;
 
