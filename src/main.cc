@@ -111,7 +111,7 @@ int main (int argc, char ** argv)
 				std::string lib_name = data->values["gen"];
 				auto lib = conf.find("sys/" + lib_name);
 
-#if 1
+#if 0 // html
 				sys::parser indice_text ("../etc/web.index.plantilla",
 										 lib->name,
 										 *lib);
@@ -129,7 +129,7 @@ int main (int argc, char ** argv)
 				indice << indice_text.resultado();
 #endif
 
-#if 0
+#if 0 // protos
 				sys::parser proto_text ("../etc/hulk.proto.plantilla",
 										lib->name,
 										*lib);
@@ -158,7 +158,8 @@ int main (int argc, char ** argv)
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 0
+#if 1 // business
+					/* business header
 					sys::parser header_text ("../etc/business.header.plantilla",
 											 item->name,
 											 *(item->subelements.begin()->second));
@@ -178,8 +179,9 @@ int main (int argc, char ** argv)
 
 					header << header_text.resultado();
 					std::cout << header_text.resultado() << std::endl;
-
-					// ----
+					*/
+					/* business body
+					 */
 					sys::parser body_text ("../etc/business.body.plantilla",
 										   item->name,
 										   *item);
@@ -201,7 +203,7 @@ int main (int argc, char ** argv)
 					body << body_text.resultado();
 					std::cout << body_text.resultado() << std::endl;
 #endif
-#if 1
+#if 0 // html
 					sys::parser body_text ("../etc/web.plantilla",
 										   item->name,
 										   *item);

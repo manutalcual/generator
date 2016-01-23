@@ -59,45 +59,38 @@ sys {
     qxgen {
 
 	Controllers {
-	    Id {
-		type = "integer";
-		primary = true;
-		not_null = true;
+	    fields = fields;
+	    fields {
+		AAFixedAddress {
+		    type = "nvarchar";
+		    not_null = false;
+		}
+		ABId {
+		    type = "integer";
+		    primary = true;
+		    not_null = true;
+		}
+		IsSyncActive {
+		    type = "bit";
+		    not_null = true;
+		}
+		Language {
+                    type = "blob";
+                    not_null = true;
+                    default = "es_ES";
+		}
+		EntityType {
+		    type = "datetime";
+		    size = 4000;
+		    not_null = true;
+		}
 	    }
-	    FixedAddress {
-		type = "nvarchar";
-		not_null = true;
-	    }
-	    IsSyncActive {
-		type = "bit";
-		not_null = true;
-	    }
-	    CompnayId {
-		type = "integer";
-	    }
-	    Mode {
-		type = "nvarchar";
-		not_null = true;
-	    }
-	    Name {
-		type = "bit";
-		size = 255;
-	        default = "";
-	    }
-            Language {
-                type = "blob";
-                not_null = true;
-                default = "es_ES";
-            }
-	    EntityType {
-		type = "datetime";
-		size = 4000;
-		not_null = true;
-	    }
-	    LastModified {
-		type = "datetime";
-		automatic = true;
-		generate = "QDateTime::currentDateTime()";
+	    relations {
+		Id {
+		    type = "integer";
+		    primary = true;
+		    not_null = true;
+		}
 	    }
 	}
     }

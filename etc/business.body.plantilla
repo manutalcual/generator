@@ -1,7 +1,7 @@
 //
 //
 //
-#include "\do lcase {${_}}businessbase.h"
+#include "\do lcase [${_}]businessbase.h"
 
 
 const char * const g_err = "Controller doesn't exist";
@@ -289,60 +289,51 @@ Bytech::Hulk::HulkResult * ${_}BusinessBase::get_errors_proto()
 void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 {
     QSqlError error;
-\for {
-\for {
-    // % (not null \if %.not_null == yes {YES } {NO } )
-    if (! proto.has_\do lcase {% }())
+    \for fields [
+    // %
+    \if %.not_null == true [if (! proto.has_\do lcase [%]())
     {
         error.setType(QSqlError::ErrorType::UnknownError);
         error.setNumber(Bytech::Hulk::Enums::HulkError::MissingRequiredField);
         _errors.append(error);
-    \}
-    else
-    { // %.type
-    \if %.type == nvarchar {QString str_% = QString::fromStdString(proto.\do lcase {%}());
-    db.set% (str_%);
-    } { }
-    \if %.type == integer {long long_% = proto.\do lcase {%}();
-    db.set% (long_%);
-    } { }
-    \if %.type == datetime {QDateTime datetime_%;
-    datetime_% .setTime_t(proto.\do lcase {%}());
-    db.set% (datetime_%);
-    } { }
-    \if %.type == blob {char * blob_% = proto.\do lcase {%}();
-    db.set% (QByteArray(blob_%));
-    } { }
-    \if %.type == bit {bool bit_% = proto.\do lcase {%}();
-    db.set% (QVariant(bit_%));
-    } { }
-    \}
     }
+    else
+    {
+	]
+        // %.type
+        \if %.type == nvarchar [QString str_% = QString::fromStdString(proto.\do lcase [%]());
+        db.set% (str_%);
+        ] \if %.type == integer [long long_% = proto.\do lcase [%]();
+        db.set% (long_%);
+        ] \if %.type == datetime [QDateTime datetime_%;
+        datetime_% .setTime_t(proto.\do lcase [%]());
+        db.set% (datetime_%);
+        ] \if %.type == blob [char * blob_% = proto.\do lcase [%]();
+        db.set% (QByteArray(blob_%));
+        ] \if %.type == bit [bool bit_% = proto.\do lcase [%]();
+        db.set% (QVariant(bit_%));
+        ]
+	\if %.not_null == true [
+    }
+	]]
 }
 
 
 void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
 {
-\for {
-    \for { // %
-    \if %.type == nvarchar {std::string str_% = db.get%().toStdString();
-    proto.set_\do lcase {%} (str_%);
-    } { }
-    \if %.type == integer {long long_% = db.get%();
-    proto.set_\do lcase {%} (long_%);
-    } { }
-    \if %.type == datetime {QDateTime datetime_% = db.get%();
-    proto.set_\do lcase {%} (datetime_% .toTime_t());
-    } { }
-    \if %.type == blob {QByteArray blob_% = db.get%();
-    proto.set_\do lcase {%} (blob_% .data());
-    } { }
-    \if %.type == bit {QVariant bit_% = db.get%();
-    proto.set_\do lcase {%} (bit_% .toBool());
-    } { }
-    }
+    \for fields [// %
+    \if %.type == nvarchar [std::string str_% = db.get%().toStdString();
+        proto.set_\do lcase [%] (str_%);
+    ] \if %.type == integer [long long_% = db.get%();
+    proto.set_\do lcase [%] (long_%);
+    ] \if %.type == datetime [QDateTime datetime_% = db.get%();
+    proto.set_\do lcase [%] (datetime_% .toTime_t());
+    ] \if %.type == blob [QByteArray blob_% = db.get%();
+    proto.set_\do lcase [%] (blob_% .data());
+    ] \if %.type == bit [QVariant bit_% = db.get%();
+    proto.set_\do lcase [%] (bit_% .toBool());
+    ] ]
 }
-
 
 
 
