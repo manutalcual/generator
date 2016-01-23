@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-18 14:47:02 manuel>
+// Time-stamp: <2016-01-23 12:06:18 manuel>
 //
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -177,8 +177,8 @@ namespace sys {
             throw "Block body name is empty.";
         }
 
-        if (match('=')) {
-            incr (); // ++_idx; // skip '='
+        if (match(':')) {
+            incr (); // ++_idx; // skip ':'
             std::string val = get_value();
             nlogp (sys::e_debug, "Inserting: " 
                   << bname << "=" << val
@@ -210,8 +210,8 @@ namespace sys {
         } else if (_idx >= _size) {
             return;
         } else {
-            nlogp (sys::e_crit, "conf parser was expecting "
-                  << "'=' or '}', but the char at pos is: '"
+            logp (sys::e_crit, "conf parser was expecting "
+                  << "':' or '}', but the char at pos is: '"
                   << _data[_idx]
                   << "'; can't continue parsing. "
                   << _idx);

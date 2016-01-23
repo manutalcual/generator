@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 11:55:31 manuel>
+// Time-stamp: <2016-01-23 12:07:52 manuel>
 //
 //
 // Includes
@@ -183,11 +183,6 @@ namespace sys {
 		skip_blanks (i);
 		op2 = escapa(i, ' ');
 		skip_blanks (i);
-
-		logp (sys::e_debug, "operators "
-			  << op1
-			  << oper
-			  << op2);
 
 		if (oper == "==") {
 			if (op1 == op2) {
@@ -426,18 +421,13 @@ namespace sys {
 			}
 			++i;
 		}
-		logp (sys::e_debug, "SKIPED: '" << word << "', " << _str[i] << ".");
 	}
-
-
 
 	void parser::skip_blanks (int & i)
 	{
 		std::string word;
 		while (i < _size && (::isblank(_str[i]) /* || _str[i] == '\n' */))
 			word += _str[i++];
-
-		logp (sys::e_debug, "BLANK '" << word << "'");
 	}
 	
 } // end namespace sys
