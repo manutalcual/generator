@@ -1,0 +1,17 @@
+#ifndef TEST${_}_H
+#define TEST${_}_H
+
+#include <QObject>
+
+class Test${_} : public QObject
+{
+    Q_OBJECT
+public:
+    Test${_}();
+
+private Q_SLOTS:
+\for fields [    void test_%();
+]
+};
+
+#endif // TEST${_}_H

@@ -1,0 +1,44 @@
+
+#include "test\do lcase [${_}].h"
+
+#include "\do lcase [${_}]businessbase.h"
+
+#include <ByEntities>
+
+Test${_}::Test${_}()
+{
+
+}
+
+\for fields [
+void Test${_}::test_${_}()
+{
+
+    qx::QxSqlDatabase::getSingleton()->setDriverName("QSQLITE");
+    qx::QxSqlDatabase::getSingleton()->setDatabaseName("/home/raul/gitserver/hulk/hulkr.db");
+    qx::QxSqlDatabase::getSingleton()->setHostName("localhost");
+    qx::QxSqlDatabase::getSingleton()->setUserName("root");
+    qx::QxSqlDatabase::getSingleton()->setPassword("");
+    qx::QxSqlDatabase::getSingleton()->setTraceSqlRecord(true);
+    qx::QxSqlDatabase::getSingleton()->setTraceSqlQuery(true);
+
+
+    ${_}BusinessBase \do lcase [${_}]BusinessBase;
+
+
+    //QSharedPointer<KnobSiteUserPermissions> knobsiteuserpermissions = QSharedPointer<KnobSiteUserPermissions>(new KnobSiteUserPermissions());
+
+    QSharedPointer<${_}> \do lcase [${_}] = QSharedPointer<${_}>(new ${_}());
+
+    \do lcase [${_}]->set%("es_Es");
+
+    \do lcase [${_}]->qxInsert();
+
+    QSharedPointer<${_}> controller = QSharedPointer<${_}>(new ${_}());
+
+    controller->setFixedAddress("aaaaa");
+
+    controller->qxInsert();
+
+    qDebug() << "fin";
+}
