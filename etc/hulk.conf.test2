@@ -38,7 +38,7 @@ sys {
 		type : lib;
 		name : "hulk";
 		gen : qxgen;
-		gen_tests : true; # will generate all tests, c++, angular, etc.
+		gen_tests : true; // will generate all tests, c++, angular, etc.
 		    gen_angular : true;
 		gen_html : true;
 		gen_db : true;
@@ -79,6 +79,9 @@ sys {
                     not_null : true;
                     default : "es_ES";
 		}
+		/*
+		 * No se hace nada con el tamaño
+		 */
 		EntityType {
 		    type : "datetime";
 		    size : 4000;

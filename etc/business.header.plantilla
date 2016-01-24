@@ -1,8 +1,8 @@
 //
 // Includes
 //
-#ifndef \do ucase {${_}}BUSINESSBASE_H
-#define \do ucase {${_}}BUSINESSBASE_H
+#ifndef \do ucase [${_}]BUSINESSBASE_H
+#define \do ucase [${_}]BUSINESSBASE_H
 
 #include <vector>
 #include <QDebug>
@@ -28,7 +28,7 @@ public:
     ${_}BusinessBase(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
 
 	// Insert
-    QSqlError InsertItem(${_} & \do lcase {${_}},
+    QSqlError InsertItem(${_} & \do lcase [${_}],
     	      const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
 	// Delete
     QSqlError DeleteItem(QVariant id, const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
@@ -50,4 +50,4 @@ private:
     void db_to_proto(${_} &db, Bytech::Hulk::${_} &proto);
 
 };
-#endif // \do ucase{${_}}BUSINESSBASE_H
+#endif // \do ucase[${_}]BUSINESSBASE_H

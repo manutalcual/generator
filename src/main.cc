@@ -135,11 +135,11 @@ int main (int argc, char ** argv)
 										*lib);
 
 				std::string pname ("generated/hulk.proto");
-				sys::stat_t stat_proto (pname);
+				//sys::stat_t stat_proto (pname);
 
-				if (stat_proto) {
-					sys::file_system::safe_mv (pname, pname + ".old");
-				}
+				//if (stat_proto) {
+				//	sys::file_system::safe_mv (pname, pname + ".old");
+				//}
 
 				std::ofstream proto (pname);
 				if (! proto.is_open()) {
@@ -158,7 +158,7 @@ int main (int argc, char ** argv)
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 1 // business
+#if 0 // business
 					/* business header
 					sys::parser header_text ("../etc/business.header.plantilla",
 											 item->name,
@@ -167,9 +167,9 @@ int main (int argc, char ** argv)
 					std::string hname ("generated/" + sys::lower(item->name) + "businessbase.h");
 					sys::stat_t stat_header (hname);
 
-					if (stat_header) {
-						sys::file_system::safe_mv (hname, hname + ".old");
-					}
+					//if (stat_header) {
+					//	sys::file_system::safe_mv (hname, hname + ".old");
+					//}
 
 					std::ofstream header (hname);
 					if (! header.is_open()) {
@@ -180,6 +180,7 @@ int main (int argc, char ** argv)
 					header << header_text.resultado();
 					std::cout << header_text.resultado() << std::endl;
 					*/
+					
 					/* business body
 					 */
 					sys::parser body_text ("../etc/business.body.plantilla",
@@ -190,9 +191,9 @@ int main (int argc, char ** argv)
 					std::string bname ("generated/" + sys::lower(item->name) + "businessbase.cpp");
 					sys::stat_t stat_body (bname);
 
-					if (stat_body) {
-						sys::file_system::safe_mv (bname, bname + ".old");
-					}
+					//if (stat_body) {
+					//	sys::file_system::safe_mv (bname, bname + ".old");
+					//}
 
 					std::ofstream body (bname);
 					if (! body.is_open()) {
@@ -202,6 +203,7 @@ int main (int argc, char ** argv)
 
 					body << body_text.resultado();
 					std::cout << body_text.resultado() << std::endl;
+					break;
 #endif
 #if 0 // html
 					sys::parser body_text ("../etc/web.plantilla",
@@ -220,6 +222,7 @@ int main (int argc, char ** argv)
 
 					body << body_text.resultado();
 					std::cout << body_text.resultado() << std::endl;
+					break;
 #endif
 				}
 			}

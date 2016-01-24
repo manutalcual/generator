@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 11:35:33 manuel>
+// Time-stamp: <2016-01-23 13:07:32 manuel>
 //
 // Includes
 //
@@ -41,6 +41,13 @@ namespace sys {
 				: block (0),
 				  count (0),
 				  index (0)
+				{}
+			scope_t (const scope_t & scope)
+				: block (scope.block),
+				  begin (scope.begin),
+				  end (scope.end),
+				  count (scope.count),
+				  index (scope.index)
 				{}
         };
 		typedef std::vector<scope_t> vecscopes_t;
@@ -86,6 +93,8 @@ namespace sys {
 
 		void skip_blanks (int & i);
 		void skip_bloque (int & i);
+		void push_scope (scope_t & scope);
+		void pop_scope ();
 	};
 
 } // end namespace sys

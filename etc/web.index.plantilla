@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Indice de páginas de test</h1>
+        <hr />
+\for {
+        <a href="\do lcase {%}.html">%</a>
+}
+    </body>
+</html>

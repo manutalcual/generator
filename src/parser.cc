@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 12:07:52 manuel>
+// Time-stamp: <2016-01-23 13:13:53 manuel>
 //
 //
 // Includes
@@ -116,6 +116,9 @@ namespace sys {
 			word = _scopes[_cur_scope].block->values[command];
 		} else if (_str[i] == '#') {
 			std::string num;
+			logp (sys::e_debug, "Field num: ("
+				  << _cur_scope << ") "
+				  << _scopes[_cur_scope].index);
 			int s = _scopes[_cur_scope].index; 
 			++i;
 			if (_str[i] == '+') {
@@ -231,8 +234,8 @@ namespace sys {
 				scope_t scope;
 				scope.block = beg->second;
 				scope.count = scope.block->subelements.size();
-				_scopes.push_back (scope);
-				++_cur_scope;
+				scope.index = 0;
+				push_scope (scope);
 				found = true;
 				break;
 			}
@@ -247,8 +250,6 @@ namespace sys {
 		std::string word;
 		int scope_depth = 0;  // we consider this to be our initial
 							  // scope, now
-
-		scope_t & cur_scope = _scopes[_cur_scope];
 
 		skip_blanks (i);
 
@@ -273,8 +274,10 @@ namespace sys {
 		// This has to be initialized after looking for subelement
 		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
 		tblockite_t end = _scopes[_cur_scope].block->subelements.end();;
+		scope_t & cur_scope = _scopes[_cur_scope];
 
 		cur_scope.index = 0;
+		int index = 1;
 		int last_pos = i;
 		for (; beg != end; ++beg) {
 			scope_t scope;
@@ -282,27 +285,27 @@ namespace sys {
 			scope.begin = beg;
 			scope.end = end;
 			scope.count = scope.block->subelements.size();
-			scope.index = ++cur_scope.index;
-			_scopes.push_back (scope);
-			++_cur_scope;
+			scope.index = index; //++cur_scope.index;
+			push_scope (scope);
 
 			logp (sys::e_debug, "");
-			logp (sys::e_debug, "        " << scope.block->name);
+			logp (sys::e_debug, "        " << scope.block->name
+				  << " " << scope.index
+				  << " (" << index << ")"
+				  << " (" << _scopes[_cur_scope].index << ")");
+			++index;
 			logp (sys::e_debug, "");
 			int pos = i;
 			word += escapa(pos, ']');
 			last_pos = pos;
 
-			_scopes.pop_back ();
-			--_cur_scope;
+			pop_scope ();
 		}
 		i = last_pos;
 		++i; // skip closing ']' a MUST
 
 		if (subelem != "") {
-			cur_scope.index = 0;
-			_scopes.pop_back ();
-			--_cur_scope;
+			pop_scope ();
 		}
 
 		return word;
@@ -428,6 +431,26 @@ namespace sys {
 		std::string word;
 		while (i < _size && (::isblank(_str[i]) /* || _str[i] == '\n' */))
 			word += _str[i++];
+	}
+
+	void parser::push_scope (scope_t & scope)
+	{
+		logp (sys::e_debug, "Scope count: "
+			  << _cur_scope
+			  << ", field num: "
+			  << _scopes[_cur_scope].index);
+		_scopes.push_back (scope);
+		++_cur_scope;
+	}
+	
+	void parser::pop_scope ()
+	{
+		_scopes.pop_back ();
+		--_cur_scope;
+		logp (sys::e_debug, "Scope count: "
+			  << _cur_scope
+			  << ", field num: "
+			  << _scopes[_cur_scope].index);
 	}
 	
 } // end namespace sys
