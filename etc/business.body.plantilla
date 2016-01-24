@@ -290,7 +290,7 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 {
     QSqlError error;
     \for fields [
-    // %
+    // % %#
     \if %.not_null == true [if (! proto.has_\do lcase [%]())
     {
         error.setType(QSqlError::ErrorType::UnknownError);
@@ -300,7 +300,7 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
     else
     {
 	]
-        // %.type
+        // %.type %#
         \if %.type == nvarchar [QString str_% = QString::fromStdString(proto.\do lcase [%]());
         db.set% (str_%);
         ] \if %.type == integer [long long_% = proto.\do lcase [%]();
@@ -321,7 +321,7 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 
 void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
 {
-    \for fields [// %
+    \for fields [// % %#
     \if %.type == nvarchar [std::string str_% = db.get%().toStdString();
         proto.set_\do lcase [%] (str_%);
     ] \if %.type == integer [long long_% = db.get%();
