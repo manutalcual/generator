@@ -1,0 +1,101 @@
+//
+// Configuration file for Hulk
+//
+
+sys {
+
+    libs {
+	qxorm {
+	    debug : "QxOrmd";
+	    release : "QxOrm";
+	    path : "/home/manuel/QxOrm";
+	    libs : "/home/manuel/build-QxOrm-Desktop_Qt_5_3_GCC_64bit-Debug";
+	    include : "/home/manuel/QxOrm/include";
+	}
+	qtcore {
+	    debug : "Qt5Core";
+	    release : "Qt5Core";
+	    path : "/home/manuel/Qt/5.3/gcc_64";
+	    libs : "/home/manuel/Qt/5.3/gcc_64/lib";
+	    include : "/home/manuel/Qt/5.3/gcc_64/include";
+	}
+	qtsql {
+	    debug : "Qt5Sql";
+	    release : "Qt5Sql";
+	    path : "/home/manuel/Qt/5.3/gcc_64";
+	    libs : "/home/manuel/Qt/5.3/gcc_64/lib";
+	    include : "/home/manuel/Qt/5.3/gcc_64/include";
+	}
+    }
+
+    main {
+	name : "Hulk";
+	path : ".";
+	js : "./js";
+
+	subprojects {
+	    data {
+		type : lib;
+		name : "hulk";
+		gen : qxgen;
+		gen_tests : true; // will generate all tests, c++, angular, etc.
+		    gen_angular : true;
+		gen_html : true;
+		gen_db : true;
+		gen_qtpro : true;
+		gen_submake : true;
+                gen_servers : true;
+                gen_server : true;
+                tests_dir : "tests";
+	    }
+	    main {
+		type : app;
+		use : qxgen;
+		name : "main";
+	    }
+	}
+    }
+
+    qxgen {
+
+	Controllers {
+	    fields : fields;
+	    fields {
+		AAFixedAddress {
+		    type : "nvarchar";
+		    not_null : false;
+		}
+		ABId {
+		    type : "integer";
+		    primary : true;
+		    not_null : true;
+		}
+		IsSyncActive {
+		    type : "bit";
+		    not_null : true;
+		}
+		Language {
+                    type : "blob";
+                    not_null : true;
+                    default : "es_ES";
+		}
+		/*
+		 * No se hace nada con el tamaño
+		 */
+		EntityType {
+		    type : "datetime";
+		    size : 4000;
+		    not_null : true;
+		}
+	    }
+	    relations {
+		Id {
+		    type : "integer";
+		    primary : true;
+		    not_null : true;
+		}
+	    }
+	}
+    }
+}
+

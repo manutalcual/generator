@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="long.js"></script>
+        <script src="bytebuffer.js"></script>
+        <script src="protobuf.js"></script>
+        <script>
+         if (typeof dcodeIO === 'undefined' || !dcodeIO.ProtoBuf) {
+             throw(new Error("ProtoBuf.js is not present. Please see www/index.html for manual setup instructions."));
+         }
+         // Initialize ProtoBuf.js
+         var ProtoBuf = dcodeIO.ProtoBuf;
+         var builder = ProtoBuf.newBuilder();
+
+         ProtoBuf.loadProtoFile("base.enums.proto", builder);
+         //ProtoBuf.loadProtoFile("base.proto", builder);
+         ProtoBuf.loadProtoFile("hulk.proto", builder);
+
+         var enums = builder.build('Bytech.Base.Enum');
+         var base = builder.build('Bytech.Base');
+         var hulk_enums = builder.build('Bytech.Hulk.Enums');
+         var root = builder.build('Bytech.Hulk');
+
+         var resp = {};
+        </script>
+    </head>
+    <body>
+        <textarea id="log" style="width: 100%; height: 200px"></textarea>
+        Identificador: <input type="text" id="text" value="3" />
+        <button onclick="sendGetAll()">Get all</button>
+        <button onclick="sendGetById()">By Id</button>
+        <button onclick="sendUpdate()">Update</button>
+        <button onclick="sendInsert()">Insert</button>
+        <button onclick="sendDelete()">Delete</button>&nbsp;&nbsp;&nbsp;
+        <button onclick="sendError()">Send error</button><br />
+        <hr />
+        <a href="index.hml">Indice</a>
+        <h3>${_}</h3>
+        <table>
+\for { // ${_}
+    \for {
+            <tr>
+                <td>% (%.type)</td>
+                <td><input type="text" id="%"  />
+                </td>
+            </tr>
+    }
+
+}
+        </table>
+        <br />
+
+        <script>
+         var log = document.getElementById("log");
+         var text = document.getElementById("text");
+         // Connect to our server: node server.js
+         var socket = new WebSocket("ws://localhost:9095");
+         socket.binaryType = "arraybuffer"; // We are talking binary
+
+         function sendGetAll() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 var MessageHeader = base.MessageHeader;
+                 var BaseHeader = root.BaseHeader;
+                 var HulkGetAll = root.HulkGetAll;
+
+                 var header = new MessageHeader;
+                 var baseHeader = new BaseHeader;
+                 var msg = new HulkGetAll;
+
+                 header.package = 1;
+                 header.entity = hulk_enums.HulkEntityType.HulkGetAll;
+                 header.action = hulk_enums.HulkActions.GetAll;
+                 header.sequence = 1;
+                 header.changeset_id = 1;
+                 header.order = 1;
+                 header.microtransactions_count = 1;
+
+                 msg.Header = {};
+                 msg.Header.Header = {};
+                 msg.Header.Header.package = 1;
+                 msg.Header.Header.entity = hulk_enums.HulkEntityType.HulkGetAll;
+                 msg.Header.Header.action = hulk_enums.HulkActions.GetAll;
+                 msg.Header.Header.sequence = 1;
+                 msg.Header.Header.changeset_id = 1;
+                 msg.Header.Header.order = 1;
+                 msg.Header.Header.microtransactions_count = 1;
+
+                 //baseHeader.Header = header;
+                 baseHeader.SessionId = "AAAAA";
+
+                 //msg.Header = baseHeader;
+                 msg.QueryEntity = hulk_enums.HulkEntityType.${_};
+                 
+                 socket.send (msg.toArrayBuffer());
+                 log.value += "Something sent.\\n";
+                 log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         function sendGetById() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 var MessageHeader = base.MessageHeader;
+                 var BaseHeader = root.BaseHeader;
+                 var HulkGetById = root.HulkGetById;
+
+                 var header = new MessageHeader;
+                 var baseHeader = new BaseHeader;
+                 var msg = new HulkGetById;
+
+                 header.package = 1;
+                 header.entity = hulk_enums.HulkEntityType.HulkGetById;
+                 header.action = hulk_enums.HulkActions.GetById;
+                 header.sequence = 1;
+                 header.changeset_id = 1;
+                 header.order = 1;
+                 header.microtransactions_count = 1;
+
+                 baseHeader.Header = header;
+                 baseHeader.SessionId = "AA";
+
+                 msg.Header = baseHeader;
+                 msg.QueryEntity = hulk_enums.HulkEntityType.${_};
+                 msg.Id = parseInt(text.value);
+                 
+                 socket.send (msg.toArrayBuffer());
+                 log.value += "Something sent.\\n";
+                 log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         function sendDelete() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 var MessageHeader = base.MessageHeader;
+                 var BaseHeader = root.BaseHeader;
+                 var HulkDelete = root.HulkDelete;
+
+                 var header = new MessageHeader;
+                 var baseHeader = new BaseHeader;
+                 var msg = new HulkDelete;
+
+                 header.package = 1;
+                 header.entity = hulk_enums.HulkEntityType.HulkGetById;
+                 header.action = hulk_enums.HulkActions.Delete;
+                 header.sequence = 1;
+                 header.changeset_id = 1;
+                 header.order = 1;
+                 header.microtransactions_count = 1;
+
+                 baseHeader.Header = header;
+                 baseHeader.SessionId = "AA";
+
+                 msg.Header = baseHeader;
+                 msg.QueryEntity = hulk_enums.HulkEntityType.${_};
+                 document.getElementById("Id").value = document.getElementById("text").value;
+                 msg.Id = parseInt(document.getElementById("text").value);
+                 
+                 try {
+                     socket.send (msg.toArrayBuffer());
+                     log.value += "Something sent.\\n";
+                     log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
+                 } catch (Error) {
+                     log.value += 'Exception: ' + Error + "\\n";
+                 }
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         function sendUpdate() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 try {
+                     var MessageHeader = base.MessageHeader;
+                     var BaseHeader = root.BaseHeader;
+                     var header = new MessageHeader;
+                     var baseHeader = new BaseHeader;
+                     var ${_} = root.${_};
+                     var msg = new ${_};
+
+                     header.package = 1;
+                     header.entity = hulk_enums.HulkEntityType.${_};
+                     header.action = hulk_enums.HulkActions.Update;
+                     header.sequence = 1;
+                     header.changeset_id = 1;
+                     header.order = 1;
+                     header.microtransactions_count = 1;
+
+                     baseHeader.Header = header;
+                     baseHeader.SessionId = "AA";
+
+                     msg.Header = baseHeader;
+
+                     document.getElementById("Id").value = document.getElementById("text").value;
+                     msg.Id = parseInt(document.getElementById("Id").value);
+
+                     \for {
+                         \for {
+                             \if %.type == integer {
+                                 msg.% = parseInt(document.getElementById("%").value);
+                             } { }
+                             \if %.type == nvarchar {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == bit {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == blob {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == datetime {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                         }
+                     }
+                     socket.send (msg.toArrayBuffer());
+                     log.value += "Something sent.\\n";
+                     log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
+                 } catch (Error) {
+                     log.value += 'Exception: ' + Error + "\\n";
+                 }
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         function sendError() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 try {
+                     var MessageHeader = base.MessageHeader;
+                     var BaseHeader = root.BaseHeader;
+                     var header = new MessageHeader;
+                     var baseHeader = new BaseHeader;
+                     var ${_} = root.${_};
+                     var msg = new ${_};
+
+                     header.package = 1;
+                     header.entity = hulk_enums.HulkEntityType.${_};
+                     header.action = hulk_enums.HulkActions.Update;
+                     header.sequence = 1;
+                     header.changeset_id = 1;
+                     header.order = 1;
+                     header.microtransactions_count = 1;
+
+                     baseHeader.Header = header;
+                     baseHeader.SessionId = "AA";
+
+                     msg.Header = baseHeader;
+                     //msg.QueryEntity = hulk_enums.HulkEntityType.Controllers;
+
+                     document.getElementById("Id").value = document.getElementById("text").value;
+                     msg.Id = parseInt(document.getElementById("Id").value);
+
+                     msg.Name = document.getElementById("Name").value;
+
+                     socket.send (msg.toArrayBuffer());
+                     log.value += "Something sent.\\n";
+                     log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
+                 } catch (Error) {
+                     log.value += 'Exception: ' + Error + "\\n";
+                 }
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         function sendInsert() {
+             if (socket.readyState == WebSocket.OPEN) {
+
+                 try {
+                     var MessageHeader = base.MessageHeader;
+                     var BaseHeader = root.BaseHeader;
+                     var header = new MessageHeader;
+                     var baseHeader = new BaseHeader;
+                     var ${_} = root.${_};
+                     var msg = new ${_};
+
+                     header.package = 1;
+                     header.entity = hulk_enums.HulkEntityType.${_};
+                     header.action = hulk_enums.HulkActions.Insert;
+                     header.sequence = 1;
+                     header.changeset_id = 1;
+                     header.order = 1;
+                     header.microtransactions_count = 1;
+
+                     baseHeader.Header = header;
+                     baseHeader.SessionId = "AA";
+
+                     msg.Header = baseHeader;
+                     //msg.QueryEntity = hulk_enums.HulkEntityType.Controllers;
+
+                     \for {
+                         \for {
+                             \if %.type == integer {
+                                 msg.% = parseInt(document.getElementById("%").value);
+                             } { }
+                             \if %.type == nvarchar {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == bit {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == blob {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                             \if %.type == datetime {
+                                 msg.% = document.getElementById("%").value;
+                             } { }
+                         }
+                     }
+                     socket.send (msg.toArrayBuffer());
+                     log.value += "Something sent.\\n";
+                     log.value += "Sent: " + msg.toArrayBuffer() + "\\\n";
+                 } catch (Error) {
+                     log.value += 'Exception: ' + Error + "\\n";
+                 }
+             } else {
+                 log.value += "Not connected\\n";
+             }
+         }
+
+         socket.onopen = function() {
+             log.value += "Connected\\n";
+         };
+
+         socket.onclose = function() {
+             log.value += "Disconnected\\n";
+         };
+
+         function mySetValue (name, value) {
+             var obj = document.getElementById(name);
+
+             if (obj) {
+                 obj.value = value ? value : 'null';
+             }
+         };
+
+         socket.onmessage = function(evt) {
+             try {
+                 // Decode the Message
+                 log.value += "Receiving.\\n";
+                 var ControllersList = root.ControllersList;
+                 var MessageExchange = root.MessageExchange;
+                 var ${_} = root.${_};
+                 var HulkResult = root.HulkResult;
+                 var msg = {};
+                 var i = 0;
+                 //msg.Name = "Pepe";g
+                 //log.value += "Receive object set to: '" + msg. + "'\\n";
+                 //dcodeIO.ByteBuffer.wrap(evt.data).printDebug();
+                 //msg = ControllersList.decode(evt.data);
+                 log.value += 'Decoding...' + '\\n';
+                 msg = MessageExchange.decode(evt.data);
+
+                 log.value += 'Entity received: ' + msg.Header.Header.entity + '\\n';
+
+                 switch (msg.Header.Header.entity) {
+                     case hulk_enums.HulkEntityType.Rejected:
+                         log.value += "Received Rejected\\n";
+                         msg = HulkResult.decode(evt.data);
+                         resp = msg;
+
+                         for (i = 0; i < msg.Errors.length; ++i)
+                             log.value += "Received: ["
+                                        + msg.List[i].Severity + "] "
+                                        + msg.List[i].ErrorCode + ": '"
+                                        + msg.List[i].ErrorDescription
+                                        + "'\\n";
+                         
+                         break;
+                     case hulk_enums.HulkEntityType.%List:
+                         log.value += "Received ControllersList\\n";
+                         msg = ControllersList.decode(evt.data);
+                         resp = msg;
+                         log.value += "Received: '" + msg.List.length + "'\\n";
+                         for (i = 0; i < msg.List.length; ++i)
+                             log.value += "Received: "
+                                        + msg.List[i].Id + " : "
+                                        + "'\\n";
+                         break;
+
+                     case hulk_enums.HulkEntityType.Controllers:
+                         log.value += "Received Controllers\\n";
+                         msg = Controllers.decode(evt.data);
+                         resp = msg;
+                         log.value += "Received Controller: '"
+                                    + msg.Id
+                                    + ", "
+                                    + msg.Name
+                                    + ", "
+                                    + msg.LastModified
+                                    + "'\\n";
+
+                         \for {
+                             \for { // ---
+                                 \if %.type == integer {
+                                     mySetValue ("%", msg.%);
+                                 }
+                             }
+                         }
+                         break;
+
+                     default:
+                         log.value += "Received Unknown\\n";
+                         log.value += 'Unknown object (entity type).';
+                         break;
+                 }
+                 //log.value += "Received: '" + msg.Header.Header.entity + "'\\n";
+                 //log.value += "Received: '" + msg.Header.SessionId + "'\\n";
+             } catch (err) {
+                 log.value += "Error: " + err + "\\n";
+             }
+         };
+         log.value = ""; // Clear log on reload
+        </script>
+    </body>
+</html>
