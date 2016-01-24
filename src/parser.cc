@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 13:13:53 manuel>
+// Time-stamp: <2016-01-24 11:35:33 manuel>
 //
 //
 // Includes
@@ -223,10 +223,12 @@ namespace sys {
 
 	bool parser::look_for_subelement (std::string & element, int & depth)
 	{
-		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
-		tblockite_t end = _scopes[_cur_scope].block->subelements.end();;
+		tblockite_t beg = _scopes[depth].block->subelements.begin();
+		tblockite_t end = _scopes[depth].block->subelements.end();;
 		bool found = false;
 
+		logp (sys::e_debug, "Current depth: " << depth << " "
+			  << _scopes[depth].block->name);
 		for (; beg != end; ++beg) {
 			tblock_t & item = *(beg->second);
 
@@ -240,23 +242,44 @@ namespace sys {
 				break;
 			}
 		}
-
+		
 		return found;
+	}
+
+	int parser::capture_depth (int & i)
+	{
+		std::string word;
+		int depth = 0;
+
+		if (_str[i] == '.' && _str[i + 1] == '.' && _str[i + 2] == '/') {
+			do {
+				i += 3; // skip '../'
+				++depth;
+			} while (_str[i] == '.' && _str[i] == '.' && _str[i + 2] == '/');
+		}
+
+		return depth;
 	}
 
 	std::string parser::process_for (int & i)
 	{
 		std::string subelem;
 		std::string word;
-		int scope_depth = 0;  // we consider this to be our initial
-							  // scope, now
-
+		int scope_depth = _cur_scope;  // we consider this to be our
+									   // initial scope, now
+		int depth_back = 0;
+		
 		skip_blanks (i);
 
 		if (_str[i] == '[')
 			++i; // skip '[' that's a MUST
 		else {
+			depth_back = capture_depth(i);
+			logp (sys::e_debug, "Depth: " << depth_back << " " << scope_depth);
+			scope_depth -= depth_back;
+			logp (sys::e_debug, "Depth: " << depth_back << " " << scope_depth);
 			subelem = capture_word(i);
+			logp (sys::e_debug, "Find at depth: " << subelem);
 			skip_blanks (i);
 			++i; // skip '['
 			if (!look_for_subelement(subelem, scope_depth)) {
@@ -272,11 +295,11 @@ namespace sys {
 
 		logp (sys::e_debug, "en for..... " << _cur_scope);
 		// This has to be initialized after looking for subelement
-		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
-		tblockite_t end = _scopes[_cur_scope].block->subelements.end();;
-		scope_t & cur_scope = _scopes[_cur_scope];
+		tblockite_t beg = _scopes[scope_depth].block->subelements.begin();
+		tblockite_t end = _scopes[scope_depth].block->subelements.end();;
+		//scope_t & cur_scope = _scopes[scope_depth];
 
-		cur_scope.index = 0;
+		//cur_scope.index = 0;
 		int index = 1;
 		int last_pos = i;
 		for (; beg != end; ++beg) {
@@ -292,7 +315,7 @@ namespace sys {
 			logp (sys::e_debug, "        " << scope.block->name
 				  << " " << scope.index
 				  << " (" << index << ")"
-				  << " (" << _scopes[_cur_scope].index << ")");
+				  << " (" << _scopes[scope_depth].index << ")");
 			++index;
 			logp (sys::e_debug, "");
 			int pos = i;
@@ -303,6 +326,8 @@ namespace sys {
 		}
 		i = last_pos;
 		++i; // skip closing ']' a MUST
+
+		_cur_scope += scope_depth;
 
 		if (subelem != "") {
 			pop_scope ();

@@ -158,7 +158,7 @@ int main (int argc, char ** argv)
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 0 // business
+#if 1 // business
 					/* business header
 					sys::parser header_text ("../etc/business.header.plantilla",
 											 item->name,
@@ -183,12 +183,12 @@ int main (int argc, char ** argv)
 					
 					/* business body
 					 */
-					sys::parser body_text ("../etc/business.body.plantilla",
+					sys::parser body_text ("../etc/test.body.template",
 										   item->name,
 										   *item);
 									  
 
-					std::string bname ("generated/" + sys::lower(item->name) + "businessbase.cpp");
+					std::string bname ("generated/test_" + sys::lower(item->name) + "businessbase.cpp");
 					sys::stat_t stat_body (bname);
 
 					//if (stat_body) {

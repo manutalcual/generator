@@ -25,9 +25,9 @@ void Test${_}::test_${_}()
 
     ${_}BusinessBase \do lcase [${_}]BusinessBase;
 
-
-    //QSharedPointer<KnobSiteUserPermissions> knobsiteuserpermissions = QSharedPointer<KnobSiteUserPermissions>(new KnobSiteUserPermissions());
-
+    \for ../../relations [
+        ${_} %.table %.field
+    ]
     QSharedPointer<${_}> \do lcase [${_}] = QSharedPointer<${_}>(new ${_}());
 
     \do lcase [${_}]->set%("es_Es");

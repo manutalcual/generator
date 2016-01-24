@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 13:07:32 manuel>
+// Time-stamp: <2016-01-24 11:22:24 manuel>
 //
 // Includes
 //
@@ -90,6 +90,7 @@ namespace sys {
 		std::string capture_oper (int & i);
 		std::string capture_num (int & i);
 		
+		int capture_depth (int & i);
 
 		void skip_blanks (int & i);
 		void skip_bloque (int & i);
