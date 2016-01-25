@@ -25,7 +25,7 @@ protected:
     QHash<ByBaseEnum::ActionType, ProcessAction> _processorCustomActions;
 
 public:
-    ${_}BusinessBaseBase(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
+    ${_}BusinessBase(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
 
 	// Insert
     QSqlError InsertItem(${_} & \do lcase {${_}},
