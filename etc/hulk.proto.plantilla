@@ -59,17 +59,17 @@ message HulkDelete {
     required int32 Id = 3;
 }
 
-\for {message % {
+\for [message % {
     required Bytech.Hulk.BaseHeader Header = 1;
-\for {    optional \if %.type == nvarchar {string} { } \if %.type == integer {int32} { } \if %.type == datetime {long } { } \if %.type == long {long} { } \if %.type == blob {bytes} { } \if %.type == bit {long } { } % = %#+1;
-} \}
-}
+\for fields [    optional \if %.type == nvarchar [string ] \if %.type == integer [int32 ] \if %.type == datetime [long ] \if %.type == long [long ] \if %.type == blob [bytes ] \if %.type == bit [long ]  % = %#+1;
+] }
+]
 
-\for {message %List {
+\for [message %List {
     required Bytech.Hulk.BaseHeader Header = 1;
     required Bytech.Hulk.HulkResult Result = 2;
     repeated % List = 3;
-\}
 }
+]
 
 

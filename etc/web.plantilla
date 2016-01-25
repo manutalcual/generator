@@ -37,16 +37,13 @@
         <a href="index.hml">Indice</a>
         <h3>${_}</h3>
         <table>
-\for { // ${_}
-    \for {
+\for fields [            <!-- % %# -->
             <tr>
                 <td>% (%.type)</td>
                 <td><input type="text" id="%"  />
                 </td>
             </tr>
-    }
-
-}
+]
         </table>
         <br />
 
@@ -200,25 +197,19 @@
                      document.getElementById("Id").value = document.getElementById("text").value;
                      msg.Id = parseInt(document.getElementById("Id").value);
 
-                     \for {
-                         \for {
-                             \if %.type == integer {
+                     \for fields [
+                             \if %.type == integer [
                                  msg.% = parseInt(document.getElementById("%").value);
-                             } { }
-                             \if %.type == nvarchar {
+                             ] \if %.type == nvarchar [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == bit {
+                             ] \if %.type == bit [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == blob {
+                             ] \if %.type == blob [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == datetime {
+                             ] \if %.type == datetime [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                         }
-                     }
+                             ]
+                         ]
                      socket.send (msg.toArrayBuffer());
                      log.value += "Something sent.\\n";
                      log.value += "Sent: " + msg.toArrayBuffer() + "\\n";
@@ -253,8 +244,7 @@
                      baseHeader.SessionId = "AA";
 
                      msg.Header = baseHeader;
-                     //msg.QueryEntity = hulk_enums.HulkEntityType.Controllers;
-
+                     //msg.QueryEntity = hulk_enums.HulkEntityType.${_};
                      document.getElementById("Id").value = document.getElementById("text").value;
                      msg.Id = parseInt(document.getElementById("Id").value);
 
@@ -294,27 +284,21 @@
                      baseHeader.SessionId = "AA";
 
                      msg.Header = baseHeader;
-                     //msg.QueryEntity = hulk_enums.HulkEntityType.Controllers;
+                     //msg.QueryEntity = hulk_enums.HulkEntityType.${_};
 
-                     \for {
-                         \for {
-                             \if %.type == integer {
+                         \for fields [
+                             \if %.type == integer [
                                  msg.% = parseInt(document.getElementById("%").value);
-                             } { }
-                             \if %.type == nvarchar {
+                             ] \if %.type == nvarchar [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == bit {
+                             ] \if %.type == bit [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == blob {
+                             ] \if %.type == blob [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                             \if %.type == datetime {
+                             ] \if %.type == datetime [
                                  msg.% = document.getElementById("%").value;
-                             } { }
-                         }
-                     }
+                             ]
+                         ]
                      socket.send (msg.toArrayBuffer());
                      log.value += "Something sent.\\n";
                      log.value += "Sent: " + msg.toArrayBuffer() + "\\\n";
@@ -346,7 +330,7 @@
              try {
                  // Decode the Message
                  log.value += "Receiving.\\n";
-                 var ControllersList = root.ControllersList;
+                 var ${_}List = root.${_}List;
                  var MessageExchange = root.MessageExchange;
                  var ${_} = root.${_};
                  var HulkResult = root.HulkResult;
@@ -355,7 +339,8 @@
                  //msg.Name = "Pepe";g
                  //log.value += "Receive object set to: '" + msg. + "'\\n";
                  //dcodeIO.ByteBuffer.wrap(evt.data).printDebug();
-                 //msg = ControllersList.decode(evt.data);
+                 //msg = ${_}List.decode(evt.data);
+
                  log.value += 'Decoding...' + '\\n';
                  msg = MessageExchange.decode(evt.data);
 
@@ -375,9 +360,9 @@
                                         + "'\\n";
                          
                          break;
-                     case hulk_enums.HulkEntityType.%List:
-                         log.value += "Received ControllersList\\n";
-                         msg = ControllersList.decode(evt.data);
+                     case hulk_enums.HulkEntityType.${_}List:
+                         log.value += "Received ${_}List\\n";
+                         msg = ${_}List.decode(evt.data);
                          resp = msg;
                          log.value += "Received: '" + msg.List.length + "'\\n";
                          for (i = 0; i < msg.List.length; ++i)
@@ -386,25 +371,17 @@
                                         + "'\\n";
                          break;
 
-                     case hulk_enums.HulkEntityType.Controllers:
-                         log.value += "Received Controllers\\n";
-                         msg = Controllers.decode(evt.data);
+                     case hulk_enums.HulkEntityType.${_}:
+                         log.value += "Received ${_}\\n";
+                         msg = ${_}.decode(evt.data);
                          resp = msg;
-                         log.value += "Received Controller: '"
+                         log.value += "Received ${_}: '"
                                     + msg.Id
-                                    + ", "
-                                    + msg.Name
-                                    + ", "
-                                    + msg.LastModified
                                     + "'\\n";
 
-                         \for {
-                             \for { // ---
-                                 \if %.type == integer {
+                             \for fields [ // ---
                                      mySetValue ("%", msg.%);
-                                 }
-                             }
-                         }
+                             ]
                          break;
 
                      default:

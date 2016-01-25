@@ -1,7 +1,11 @@
 //
 //
 //
+<<<<<<< HEAD
 #include "\do lcase {${_}}business.h"
+=======
+#include "\do lcase [${_}]businessbase.h"
+>>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 
 
 ${_}BusinessBase::${_}BusinessBase(QSharedPointer<qx::QxSession> session) : _session(session)
@@ -222,8 +226,16 @@ QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxS
         AddError(ByHulkEnum::HulkError::ItemNotExist);
         return error;
     }
+<<<<<<< HEAD
 
     TerminalsBusiness terminals(session);
+=======
+#if 0
+    TerminalsBusiness terminals_business(session);
+    ${_}::type_list_of_Terminals terminal_list;
+    auto begin = terminal_list.begin();
+    auto end = terminal_list.end();
+>>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 
     controller.getlist_of_Terminals(true);
     foreach(auto t, controller.list_of_Terminals())
@@ -234,10 +246,16 @@ QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxS
             error = AddError(ByHulkEnum::HulkError::DeletionFailure, error.text());
         }
     }
+<<<<<<< HEAD
 
     if (_session->isValid())
     {
         _session->deleteById(controller);
+=======
+#endif
+    controller.setId(id.toInt());
+    sessionlocal->deleteById(controller);
+>>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 
         if (!_session->isValid())
         {
@@ -288,6 +306,7 @@ Bytech::Hulk::HulkResult * ${_}BusinessBase::get_errors_proto()
 void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 {
     QSqlError error;
+<<<<<<< HEAD
 \for fields [
     // % (not null \if %.not_null == yes [YES ] [NO ] )
     if (! proto.has_\do lcase [% ]())
@@ -309,11 +328,41 @@ void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
     ]
     }
 ]
+=======
+    \for fields [
+    // % %#
+    \if %.not_null == true [if (! proto.has_\do lcase [%]())
+    {
+        error.setType(QSqlError::ErrorType::UnknownError);
+        error.setNumber(Bytech::Hulk::Enums::HulkError::MissingRequiredField);
+        _errors.append(error);
+    }
+    else
+    {
+	]
+        // %.type %#
+        \if %.type == nvarchar [QString str_% = QString::fromStdString(proto.\do lcase [%]());
+        db.set% (str_%);
+        ] \if %.type == integer [long long_% = proto.\do lcase [%]();
+        db.set% (long_%);
+        ] \if %.type == datetime [QDateTime datetime_%;
+        datetime_% .setTime_t(proto.\do lcase [%]());
+        db.set% (datetime_%);
+        ] \if %.type == blob [char * blob_% = proto.\do lcase [%]();
+        db.set% (QByteArray(blob_%));
+        ] \if %.type == bit [bool bit_% = proto.\do lcase [%]();
+        db.set% (QVariant(bit_%));
+        ]
+	\if %.not_null == true [
+    }
+	]]
+>>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 }
 
 
 void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
 {
+<<<<<<< HEAD
 \for fields [ // %
     \if %.type == nvarchar [proto.set_\do lcase [%](db.get%().toStdString());
     ] \if %.type == integer [proto.set_\do lcase [%](static_cast<int>(db.get%()));
@@ -325,8 +374,21 @@ void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
     proto.set_\do lcase [%] (bit_%\.toBool());
     ]
 ]
+=======
+    \for fields [// % %#
+    \if %.type == nvarchar [std::string str_% = db.get%().toStdString();
+        proto.set_\do lcase [%] (str_%);
+    ] \if %.type == integer [long long_% = db.get%();
+    proto.set_\do lcase [%] (long_%);
+    ] \if %.type == datetime [QDateTime datetime_% = db.get%();
+    proto.set_\do lcase [%] (datetime_% .toTime_t());
+    ] \if %.type == blob [QByteArray blob_% = db.get%();
+    proto.set_\do lcase [%] (blob_% .data());
+    ] \if %.type == bit [QVariant bit_% = db.get%();
+    proto.set_\do lcase [%] (bit_% .toBool());
+    ] ]
+>>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 }
-
 
 
 

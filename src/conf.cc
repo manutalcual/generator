@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-18 14:47:02 manuel>
+// Time-stamp: <2016-01-23 12:36:55 manuel>
 //
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -177,8 +177,8 @@ namespace sys {
             throw "Block body name is empty.";
         }
 
-        if (match('=')) {
-            incr (); // ++_idx; // skip '='
+        if (match(':')) {
+            incr (); // ++_idx; // skip ':'
             std::string val = get_value();
             nlogp (sys::e_debug, "Inserting: " 
                   << bname << "=" << val
@@ -207,11 +207,14 @@ namespace sys {
 
             incr (); //++_idx; // skip '}'
             --_scope;
+		} else if (match('/')) {
+			if (is_comment())
+				skip_comments ();
         } else if (_idx >= _size) {
             return;
         } else {
-            nlogp (sys::e_crit, "conf parser was expecting "
-                  << "'=' or '}', but the char at pos is: '"
+            logp (sys::e_crit, "conf parser was expecting "
+                  << "':' or '}', but the char at pos is: '"
                   << _data[_idx]
                   << "'; can't continue parsing. "
                   << _idx);
@@ -293,7 +296,15 @@ namespace sys {
 
     bool conf::is_comment ()
     {
-        if (_data[_idx] == '#')
+		if (_data[_idx] == '/' && _data[_idx + 1] == '*') {
+			do {
+				++_idx;
+			} while (! (_data[_idx] == '*' && _data[_idx + 1] == '/'));
+			_idx += 2; // skip '*/'
+			return false;
+		}
+		
+        if (_data[_idx] == '/' && _data[_idx + 1] == '/')
             return true;
 
         return false;
@@ -304,7 +315,7 @@ namespace sys {
         nflog ();
         base_parser::skip_blanks ();
 
-        while (_data[_idx] == '#') {
+        while (is_comment()) {
             skip_to ('\n');
             ++_idx; // skip '\n' itself
 			base_parser::skip_blanks ();
