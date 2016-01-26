@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-18 15:12:31 manuel>
+// Time-stamp: <2016-01-26 10:19:17 manuel>
 //
 //   This program is free software; you can redistribute it and/or modify
 //   it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ namespace sys {
         {
         public:
             typedef std::map<std::string, block_t *> mapblock_t;
+            //typedef std::vector<block_t *> mapblock_t;
             block_t ()
                 : parent (NULL)
                 {}

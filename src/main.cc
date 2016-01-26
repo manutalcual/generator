@@ -158,7 +158,7 @@ int main (int argc, char ** argv)
 				for (; begin != end; ++begin) {
 					auto item = begin->second;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 0 // business
+#if 1 // business
 					/* business header
 					sys::parser header_text ("../etc/business.header.plantilla",
 											 item->name,
@@ -183,13 +183,15 @@ int main (int argc, char ** argv)
 					
 					/* business body
 					 */
-					sys::parser body_text ("../etc/test.body.template",
+					logp (sys::e_debug, "...");
+					sys::parser body_text ("../etc/shedule.test.plantilla",
 										   item->name,
 										   *item);
 									  
 
-					std::string bname ("generated/test_" + sys::lower(item->name) + "businessbase.cpp");
-					sys::stat_t stat_body (bname);
+					logp (sys::e_debug, "...");
+					std::string bname ("generated/test" + sys::lower(item->name) + ".cpp");
+
 
 					//if (stat_body) {
 					//	sys::file_system::safe_mv (bname, bname + ".old");
