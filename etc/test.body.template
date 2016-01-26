@@ -10,7 +10,6 @@ Test${_}::Test${_}()
 
 }
 
-\for fields [
 void Test${_}::test_${_}()
 {
 
