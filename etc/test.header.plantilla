@@ -1,0 +1,33 @@
+#ifndef TEST\do ucase [${_}]_H
+#define TEST\do ucase [${_}]_H
+
+#include "bytestcase.h"
+#include <QObject>
+#include <QTest>
+
+class Test${_} :  public ByTestCase
+{
+    Q_OBJECT
+
+public:
+    Test${_}();
+
+private Q_SLOTS:
+    void initTestCase();
+    void cleanupTestCase();
+
+    void GetAll${_}();
+    void Insert${_}();
+    void Insert${_}NotExist();
+
+    void GetById${_}Success();
+    void GetById${_}NotExist();
+
+    void DeleteId${_}Success();
+    void DeleteId${_}NotExist();
+
+    void UpdateId${_}Success();
+    void UpdateId${_}NotExist();
+};
+
+#endif // TEST\do ucase [${_}]_H

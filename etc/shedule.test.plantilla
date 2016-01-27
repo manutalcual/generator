@@ -1,0 +1,9 @@
+\for fields [
+    QDateTime start% = QDateTime::currentDateTime();
+    QDateTime end% = QDateTime::currentDateTime();
+    QTime time% = end.time();
+    start%\.setTime(QTime(time%\.hour(), time%\.minute()));
+    end%\.setTime(time%\.addSecs(360));
+    message.set_\do lcase [%](start%\.toTime_t());
+    message.set_\do lcase [%](end%\.toTime_t());
+]

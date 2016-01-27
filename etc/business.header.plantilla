@@ -18,20 +18,20 @@
 #include "createheader.h"
 
 
-class ${_}BusinessBase: public EntityProcessBase<Bytech::Hulk::${_}>
+class ${_}Business: public EntityProcessBase<Bytech::Hulk::${_}>
 {
 protected:
-    typedef QByteArray(${_}BusinessBase::*ProcessAction)(const QByteArray &params);
+    typedef QByteArray(${_}Business::*ProcessAction)(const QByteArray &params);
     QHash<ByBaseEnum::ActionType, ProcessAction> _processorCustomActions;
 
 public:
-    ${_}BusinessBase(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
+    ${_}Business(QSharedPointer<qx::QxSession> session = QSharedPointer<qx::QxSession>(nullptr));
 
 	// Insert
     QSqlError InsertItem(${_} & \do lcase [${_}],
     	      const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
 	// Delete
-    QSqlError DeleteItem(QVariant id, const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
+    QSqlError DeleteItem(qint64 id, const QSharedPointer<qx::QxSession> &session = QSharedPointer<qx::QxSession>(nullptr));
 	// 
 
     QByteArray Insert(const QByteArray &params);
@@ -42,7 +42,6 @@ public:
 
 private:
     QSharedPointer<qx::QxSession> _session;
-    //Bytech::Hulk::Controllers _proto;
     QList<QSqlError> _errors;
 
     Bytech::Hulk::HulkResult * get_errors_proto ();

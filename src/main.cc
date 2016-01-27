@@ -160,11 +160,11 @@ int main (int argc, char ** argv)
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
 #if 1 // business
 					/* business header
-					sys::parser header_text ("../etc/business.header.plantilla",
+					sys::parser header_text ("../etc/test.header.plantilla",
 											 item->name,
 											 *(item->subelements.begin()->second));
 
-					std::string hname ("generated/" + sys::lower(item->name) + "businessbase.h");
+					std::string hname ("generated/test" + sys::lower(item->name) + "business.h");
 					sys::stat_t stat_header (hname);
 
 					//if (stat_header) {
@@ -184,13 +184,13 @@ int main (int argc, char ** argv)
 					/* business body
 					 */
 					logp (sys::e_debug, "...");
-					sys::parser body_text ("../etc/shedule.test.plantilla",
+					sys::parser body_text ("../etc/test.doors.plantilla",
 										   item->name,
 										   *item);
 									  
 
 					logp (sys::e_debug, "...");
-					std::string bname ("generated/test" + sys::lower(item->name) + ".cpp");
+					std::string bname ("generated/test" + sys::lower(item->name) + "business.txt");
 
 
 					//if (stat_body) {
