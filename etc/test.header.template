@@ -1,17 +1,32 @@
-#ifndef TEST${_}_H
-#define TEST${_}_H
+#ifndef TEST\do ucase [%]_H
+#define TEST\do ucase [%]_H
 
+#include "bytestcase.h"
 #include <QObject>
+#include <QTest>
 
-class Test${_} : public QObject
+class Test% :  public ByTestCase
 {
     Q_OBJECT
+
 public:
-    Test${_}();
+    Test%();
 
 private Q_SLOTS:
-\for fields [    void test_%();
-]
+    void initTestCase();
+    void cleanupTestCase();
+
+    void GetAll%();
+    void Insert%();
+
+    void GetById%Success();
+    void GetById%NotExist();
+
+    void DeleteId%Success();
+    void DeleteId%NotExist();
+
+    void UpdateId%Success();
+    void UpdateId%NotExist();
 };
 
-#endif // TEST${_}_H
+#endif // TEST\do ucase [%]_H

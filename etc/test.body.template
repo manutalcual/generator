@@ -1,43 +1,390 @@
-
-#include "test\do lcase [${_}].h"
-
-#include "\do lcase [${_}]businessbase.h"
-
+#include "test\do ucase [%].h"
+#include "\do ucase [%]sbusiness.h"
 #include <ByEntities>
+#include <incomingmessageprocessor.h>
 
-Test${_}::Test${_}()
+Test%::Test%()
 {
 
 }
 
-void Test${_}::test_${_}()
+void Test%::initTestCase()
 {
+    qInfo() << "##teamcity[testSuiteStarted name='" << "Test%Business" << "'].";
 
-    qx::QxSqlDatabase::getSingleton()->setDriverName("QSQLITE");
-    qx::QxSqlDatabase::getSingleton()->setDatabaseName("/home/raul/gitserver/hulk/hulkr.db");
-    qx::QxSqlDatabase::getSingleton()->setHostName("localhost");
-    qx::QxSqlDatabase::getSingleton()->setUserName("root");
-    qx::QxSqlDatabase::getSingleton()->setPassword("");
-    qx::QxSqlDatabase::getSingleton()->setTraceSqlRecord(true);
-    qx::QxSqlDatabase::getSingleton()->setTraceSqlQuery(true);
+    if (QTest::currentTestFailed())
+        qInfo("##teamcity[testFailed name='%']", QTest::currentTestFunction());
 
+}
 
-    ${_}BusinessBase \do lcase [${_}]BusinessBase;
+void Test%::cleanupTestCase()
+{
+    qInfo() << "##teamcity[testSuiteFinished name='" << "Test%Business" << "'].";
+}
 
-
-    //QSharedPointer<KnobSiteUserPermissions> knobsiteuserpermissions = QSharedPointer<KnobSiteUserPermissions>(new KnobSiteUserPermissions());
-
-    QSharedPointer<${_}> \do lcase [${_}] = QSharedPointer<${_}>(new ${_}());
-
-    \do lcase [${_}]->set%("es_Es");
-
-    \do lcase [${_}]->qxInsert();
-
-    QSharedPointer<${_}> controller = QSharedPointer<${_}>(new ${_}());
-
-    controller->setFixedAddress("aaaaa");
-
+void Test%::GetAll%()
+{
+    QSharedPointer<Controllers> controller = QSharedPointer<Controllers>(new Controllers);
+    controller->qxDeleteAll();
+    controller->seSetFixedAddress("AAAAAAAA");
     controller->qxInsert();
 
-    qDebug() << "fin";
+    int numrows = 10;
+    QSqlError error;
+
+    % \do ucase [%];
+    error = \do ucase [%].qxDeleteAll();
+
+    \do ucase [%].setFixedAddress("AAAAAABB");
+    \do ucase [%].setControllerId(controller);
+
+    QSharedPointer<ItemModels> itemModdel = QSharedPointer<ItemModels>(new ItemModels);
+    itemModdel->setId(1);
+    \do ucase [%].setModelId(itemModdel);
+
+    for (int i = 0; i < numrows; i++)
+    {
+        error = \do ucase [%].qxInsert();
+        QVERIFY2(!error.isValid(), "Error Insert %");
+    }
+
+    ByHulk::HulkGetAll message;
+    message.set_queryentity(ByHulkEnum::HulkEntityType::%);
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+
+    messageHeader->set_action(ByHulkEnum::HulkActions::GetAll);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::HulkGetAll);
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::%List protoRes;
+    ProtoBuf::Deserialize(response, protoRes);
+
+    QVERIFY2(protoRes.list_size() == numrows, "Error in GetAll%");
+}
+
+void Test%::Insert%()
+{
+    QSharedPointer<Controllers> controller = QSharedPointer<Controllers>(new Controllers);
+    controller->setFixedAddress("AAAAAAAA");
+    controller->qxInsert();
+
+    ByHulk::% message;
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+
+    messageHeader->set_action(ByHulkEnum::HulkActions::Insert);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_id(0);
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Ok), "Error Insert Success Item");
+
+    message.Clear();
+    ProtoBuf::Deserialize(response, message);
+
+    QVERIFY2(message.id() != 0, "Error Insert Success Item");
+}
+
+void Test%::Insert%ItemModelNotExist()
+{
+    QSharedPointer<Controllers> controller = QSharedPointer<Controllers>(new Controllers);
+    controller->setFixedAddress("AAAAAAAA");
+    controller->qxInsert();
+
+    ByHulk::% message;
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+
+    messageHeader->set_action(ByHulkEnum::HulkActions::Insert);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_id(0);
+\for fields [\if %.type == nvarchar [message.set_%("1.0.0");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Reject), "Error Insert Success Item");
+}
+
+void Test%::Insert%ControllerNotExist()
+{
+    ByHulk::% message;
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+
+    messageHeader->set_action(ByHulkEnum::HulkActions::Insert);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_id(0);
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Reject), "Error Insert Success Item");
+}
+
+void Test%::GetById%Success()
+{
+    QSqlError error;
+    QSharedPointer<Controllers> controller = QSharedPointer<Controllers>(new Controllers);
+    controller->setFixedAddress("AAAAAAAA");
+
+    error = controller->qxInsert();
+    QVERIFY2(!error.isValid(), "ERROR inserting \do ucase [%]");
+
+    % \do ucase [%]db;
+
+    \do ucase [%]db.setFixedAddress("AAAAAABB");
+    \do ucase [%]db.setControllerId(controller);
+
+    QSharedPointer<ItemModels> itemModdel = QSharedPointer<ItemModels>(new ItemModels);
+    itemModdel->setId(1);
+    \do ucase [%]db.setModelId(itemModdel);
+
+    error = \do ucase [%]db.qxInsert();
+
+    QVERIFY2(!error.isValid(), "ERROR inserting \do ucase [%]");
+
+    ByHulk::HulkGetById message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::GetById);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::HulkGetById);
+
+    message.set_queryentity(ByHulkEnum::HulkEntityType::%);
+    message.set_id(\do ucase [%]db.getId());
+\for fields [\if %.type == nvarchar [\do ucase [%]db.set%(message.%().toStdString());]
+    \if %.type == integer [\do ucase [%]db.set(message.get%());]
+    \if %.type == bit [\do ucase [%]db.set(message.get%());]
+    \if %.type == blob [\do ucase [%]db.set(QByteArray(message.%().c_str(), message.%().size()));]
+    \if %.type == int64 [// Relation not handled \do ucase [%]db.get(message.%());]
+    \if %.type == datetime [\do ucase [%]db.set(QDateTime::currentDateTime());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().entity() == ByHulkEnum::HulkEntityType::%), "Error GetById Success Item");
+    QVERIFY2( (m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Ok), "Error GetById success");
+
+    Bytech::Hulk::% \do ucase [%];
+    ProtoBuf::Deserialize(response, \do ucase [%]);
+
+    QVERIFY2(\do ucase [%].fixedaddress().compare("AAAAAABB"), "Error GetById Item");
+}
+
+void Test%::GetById%NotExist()
+{
+    ByHulk::HulkGetById message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::GetById);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::HulkGetById);
+
+    message.set_queryentity(ByHulkEnum::HulkEntityType::%);
+    message.set_id(999999);
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Reject), "Error getbyid not exist");
+}
+
+void Test%::DeleteId%uccess()
+{
+    QSharedPointer<Controllers> controllerdb = QSharedPointer<Controllers>(new Controllers);
+    controllerdb->setFixedAddress("AAAAAAAA");
+    controllerdb->qxInsert();
+
+    QSharedPointer<%> \do ucase [%]db = QSharedPointer<%>(new %);
+    \do ucase [%]db->setFixedAddress("BBBBBBBB");
+    \do ucase [%]db->setControllerId(controllerdb);
+    \do ucase [%]db->qxInsert();
+
+    ByHulk::HulkDelete message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::Delete);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_queryentity(ByHulkEnum::HulkEntityType::%);
+    message.set_id(\do ucase [%]db->getId());
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Ok), "Error delete success");
+    QVERIFY2(!\do ucase [%]db->qxExist(), "Error delete success");
+}
+
+void Test%::DeleteId%NotExist()
+{
+    ByHulk::HulkDelete message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::Delete);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_queryentity(ByHulkEnum::HulkEntityType::%);
+    message.set_id(999999);
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Reject), "Error getbyid not exist");
+}
+
+void Test%::UpdateId%uccess()
+{
+    QSqlError error;
+    QSharedPointer<Controllers> controller = QSharedPointer<Controllers>(new Controllers);
+    controller->setFixedAddress("AAAAAAAA");
+
+    error = controller->qxInsert();
+    QVERIFY2(!error.isValid(), "ERROR inserting \do ucase [%]");
+
+    % \do ucase [%]db;
+    \do ucase [%]db.setFixedAddress("AAAAAABB");
+    \do ucase [%]db.setControllerId(controller);
+
+    error = \do ucase [%]db.qxInsert();
+    QVERIFY2(!error.isValid(), "ERROR inserting \do ucase [%]");
+
+    ByHulk::% message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::Update);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_id(\do ucase [%]db.getId());
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Ok), "Error UpdateIdControllerSuccess");
+
+    \do ucase [%]db.qxFetchById();
+
+\for fields [
+    \if %.type == nvarchar [QVERIFY2(\do ucase [%]db.get%() == "STRING", "Error update item");]
+    \if %.type == blob [QVERIFY2(\do ucase [%]db.get%() == "BLOB DATA", "Error update item");]
+]
+}
+
+void Test%::UpdateId%NotExist()
+{
+    ByHulk::% message;
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::Update);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::%);
+
+    message.set_id(999999);
+\for fields [\if %.type == nvarchar [message.set_%("STRING");]
+             \if %.type == integer [message.set_%(1);]
+             \if %.type == bit [message.set_%(true);]
+             \if %.type == blob [message.set_%("BLOB DATA", 10);]
+             \if %.type == int64 [messge.set_%(1);]
+             \if %.type == datetime [message.set_%(QDateTime::currentDateTime().toTime_t());]
+]
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2( (m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Reject), "Error getbyid not exist");
+
+    % \do ucase [%]db;
+    QVERIFY2( !\do ucase [%]db.qxExist(999999), "Error update item");
 }

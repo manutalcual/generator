@@ -1,0 +1,8 @@
+    doors.setId(0);
+\for fields [\if %.type == nvarchar [message.set%("STRING");]
+    \if %.type == integer [message.set%(1);]
+    \if %.type == bit [message.set%(true);]
+    \if %.type == blob [message.set%("BLOB DATA", 10);]
+    \if %.type == int64 [message.set%(1);]
+    \if %.type == datetime [message.set%(QDateTime::currentDateTime().toTime_t());]
+]

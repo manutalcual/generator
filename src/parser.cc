@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-25 10:25:59 manuel>
+// Time-stamp: <2016-01-26 10:18:21 manuel>
 //
 //
 // Includes
@@ -114,6 +114,9 @@ namespace sys {
 			++i;
 			command = capture_word(i);
 			word = _scopes[_cur_scope].block->values[command];
+            if (word == "") {
+                word = "." + command;
+            }
 		} else if (_str[i] == '#') {
 			std::string num;
 			logp (sys::e_debug, "Field num: ("

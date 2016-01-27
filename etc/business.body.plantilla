@@ -1,14 +1,10 @@
 //
 //
 //
-<<<<<<< HEAD
-#include "\do lcase {${_}}business.h"
-=======
-#include "\do lcase [${_}]businessbase.h"
->>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
+#include "\do lcase [${_}]business.h"
 
 
-${_}BusinessBase::${_}BusinessBase(QSharedPointer<qx::QxSession> session) : _session(session)
+${_}Business::${_}Business(QSharedPointer<qx::QxSession> session) : _session(session)
 {
     if (_session.isNull())
     {
@@ -17,13 +13,13 @@ ${_}BusinessBase::${_}BusinessBase(QSharedPointer<qx::QxSession> session) : _ses
     }
 }
 
-QSqlError ${_}BusinessBase::InsertItem(${_} &controller, const QSharedPointer<qx::QxSession> &session)
+QSqlError ${_}Business::InsertItem(${_} &\do lcase [%], const QSharedPointer<qx::QxSession> &session)
 {
     QSqlError error;
 
     CheckSession(session);
 
-    error = _session->insert(controller);
+    error = _session->insert(\do lcase [%]);
 
     if (error.isValid())
     {
@@ -34,7 +30,7 @@ QSqlError ${_}BusinessBase::InsertItem(${_} &controller, const QSharedPointer<qx
     return error;
 }
 
-QByteArray ${_}BusinessBase::Insert(const QByteArray &params)
+QByteArray ${_}Business::Insert(const QByteArray &params)
 {
     QByteArray response;
     ${_} itemEntity;
@@ -69,7 +65,7 @@ QByteArray ${_}BusinessBase::Insert(const QByteArray &params)
 }
 
 
-QByteArray ${_}BusinessBase::GetAll(const QByteArray &params)
+QByteArray ${_}Business::GetAll(const QByteArray &params)
 {
     Q_UNUSED(params)
 
@@ -110,7 +106,7 @@ QByteArray ${_}BusinessBase::GetAll(const QByteArray &params)
     return response;
 }
 
-QByteArray ${_}BusinessBase::GetById(const QByteArray &params)
+QByteArray ${_}Business::GetById(const QByteArray &params)
 {
     Bytech::Hulk::HulkGetById getById;
     ProtoBuf::Deserialize(params, getById);
@@ -140,7 +136,7 @@ QByteArray ${_}BusinessBase::GetById(const QByteArray &params)
 }
 
 
-QByteArray ${_}BusinessBase::Update(const QByteArray &params)
+QByteArray ${_}Business::Update(const QByteArray &params)
 {
     QByteArray response;
     ${_} itemEntity;
@@ -182,16 +178,16 @@ QByteArray ${_}BusinessBase::Update(const QByteArray &params)
 //
 // Delete
 //
-QByteArray ${_}BusinessBase::Delete(const QByteArray &params)
+QByteArray ${_}Business::Delete(const QByteArray &params)
 {
     QByteArray response;
     Bytech::Hulk::HulkDelete itemProto;
 
     ProtoBuf::Deserialize(params, itemProto);
 
-    ${_} controller;
-    controller.setId(itemProto.id());
-    if (!controller.qxExist())
+    ${_} \do lcase [%];
+    \do lcase [%].setId(itemProto.id());
+    if (!\do lcase [%].qxExist())
     {
         AddError(ByHulkEnum::HulkError::ItemNotExist);
         response = ErrorMessage(Bytech::Hulk::Enums::HulkEntityType::HulkResult);
@@ -213,54 +209,18 @@ QByteArray ${_}BusinessBase::Delete(const QByteArray &params)
     return response;
 }
 
-QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxSession> &session)
+QSqlError ${_}Business::DeleteItem(qint64 id, const QSharedPointer<qx::QxSession> &session)
 {
     CheckSession(session);
 
     QSqlError error;
 
-    ${_} controller;
-    controller.setId(id);
-    if (!controller.qxExist())
+    ${_} \do lcase [%];
+    \do lcase [%].setId(id);
+    if (!\do lcase [%].qxExist())
     {
         AddError(ByHulkEnum::HulkError::ItemNotExist);
         return error;
-    }
-<<<<<<< HEAD
-
-    TerminalsBusiness terminals(session);
-=======
-#if 0
-    TerminalsBusiness terminals_business(session);
-    ${_}::type_list_of_Terminals terminal_list;
-    auto begin = terminal_list.begin();
-    auto end = terminal_list.end();
->>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
-
-    controller.getlist_of_Terminals(true);
-    foreach(auto t, controller.list_of_Terminals())
-    {
-        error = terminals.DeleteItem(t.second->getId(), _session);
-        if (error.isValid())
-        {
-            error = AddError(ByHulkEnum::HulkError::DeletionFailure, error.text());
-        }
-    }
-<<<<<<< HEAD
-
-    if (_session->isValid())
-    {
-        _session->deleteById(controller);
-=======
-#endif
-    controller.setId(id.toInt());
-    sessionlocal->deleteById(controller);
->>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
-
-        if (!_session->isValid())
-        {
-            error = AddError(ByHulkEnum::HulkError::DeletionFailure, _session->firstError().text());
-        }
     }
 
     return error;
@@ -271,7 +231,7 @@ QSqlError ${_}BusinessBase::DeleteItem(QVariant id, const QSharedPointer<qx::QxS
 // Error reporting
 //
 
-Bytech::Hulk::HulkResult * ${_}BusinessBase::get_errors_proto()
+Bytech::Hulk::HulkResult * ${_}Business::get_errors_proto()
 {
     Bytech::Hulk::HulkResult * result = createResultError(Bytech::Hulk::Enums::HulkEntityType::${_});
 
@@ -303,91 +263,41 @@ Bytech::Hulk::HulkResult * ${_}BusinessBase::get_errors_proto()
 // ------ Proto to db & db to Proto --------
 //
 
-void ${_}BusinessBase::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
+void ${_}Business::proto_to_db(Bytech::Hulk::${_} &proto, ${_} &db)
 {
     QSqlError error;
-<<<<<<< HEAD
 \for fields [
-    // % (not null \if %.not_null == yes [YES ] [NO ] )
-    if (! proto.has_\do lcase [% ]())
+    // % (not null \if %.not_null == yes [YES ] [NO] )
+    if (! proto.has_\do lcase [%]())
     {
         AddError(Bytech::Hulk::Enums::HulkError::MissingRequiredField, "Missing field %");
     }
     else
     {
-    \if %.type == nvarchar [db.set%(QString::fromStdString(proto.\do lcase [%]());
-    ] \if %.type == integer [long long_% = proto.\do lcase [%]();
-    db.set% (long_%);
-    ] \if %.type == datetime [QDateTime datetime_%;
-    datetime_% .setTime_t(proto.\do lcase [%]());
-    db.set% (datetime_%);
-    ] \if %.type == blob [char * blob_% = proto.\do lcase [%]();
-    db.set% (QByteArray(blob_%));
-    ] \if %.type == bit [bool bit_% = proto.\do lcase [%]();
-    db.set% (QVariant(bit_%));
+    \if %.type == nvarchar [db.set%(QString::fromStdString(proto.\do lcase [%]()));
+    ] \if %.type == integer [db.set%(proto.\do lcase [%]());
+    ] \if %.type == datetime [QDateTime date = QDateTime::fromTime_t(proto.\do lcase [%]());
+    QTime time = date.time();
+    date.setTime(QTime(time.hour(), time.minute()));
+    db.set%(date);
+    ] \if %.type == blob [std::string str% = proto.\do lcase [%]();
+    db.set% (QByteArray(str%\.c_str(), str%\.size()));
+    ] \if %.type == bit [db.set%(proto.\do lcase [%]());
     ]
     }
 ]
-=======
-    \for fields [
-    // % %#
-    \if %.not_null == true [if (! proto.has_\do lcase [%]())
-    {
-        error.setType(QSqlError::ErrorType::UnknownError);
-        error.setNumber(Bytech::Hulk::Enums::HulkError::MissingRequiredField);
-        _errors.append(error);
-    }
-    else
-    {
-	]
-        // %.type %#
-        \if %.type == nvarchar [QString str_% = QString::fromStdString(proto.\do lcase [%]());
-        db.set% (str_%);
-        ] \if %.type == integer [long long_% = proto.\do lcase [%]();
-        db.set% (long_%);
-        ] \if %.type == datetime [QDateTime datetime_%;
-        datetime_% .setTime_t(proto.\do lcase [%]());
-        db.set% (datetime_%);
-        ] \if %.type == blob [char * blob_% = proto.\do lcase [%]();
-        db.set% (QByteArray(blob_%));
-        ] \if %.type == bit [bool bit_% = proto.\do lcase [%]();
-        db.set% (QVariant(bit_%));
-        ]
-	\if %.not_null == true [
-    }
-	]]
->>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 }
 
 
-void ${_}BusinessBase::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
+void ${_}Business::db_to_proto(${_} &db, Bytech::Hulk::${_} &proto)
 {
-<<<<<<< HEAD
-\for fields [ // %
+\for fields [// %
     \if %.type == nvarchar [proto.set_\do lcase [%](db.get%().toStdString());
     ] \if %.type == integer [proto.set_\do lcase [%](static_cast<int>(db.get%()));
-    ] \if %.type == datetime [QDateTime datetime_% = db.get%();
-    proto.set_\do lcase [%] (datetime_%\.toTime_t());
-    ] \if %.type == blob [QByteArray blob_% = db.get%();
-    proto.set_\do lcase [%] (blob_%\.data());
-    ] \if %.type == bit [QVariant bit_% = db.get%();
-    proto.set_\do lcase [%] (bit_%\.toBool());
-    ]
-]
-=======
-    \for fields [// % %#
-    \if %.type == nvarchar [std::string str_% = db.get%().toStdString();
-        proto.set_\do lcase [%] (str_%);
-    ] \if %.type == integer [long long_% = db.get%();
-    proto.set_\do lcase [%] (long_%);
-    ] \if %.type == datetime [QDateTime datetime_% = db.get%();
-    proto.set_\do lcase [%] (datetime_% .toTime_t());
-    ] \if %.type == blob [QByteArray blob_% = db.get%();
-    proto.set_\do lcase [%] (blob_% .data());
-    ] \if %.type == bit [QVariant bit_% = db.get%();
-    proto.set_\do lcase [%] (bit_% .toBool());
+    ] \if %.type == datetime [proto.set_\do lcase [%](db.get%().toTime_t());
+    ] \if %.type == blob [proto.set_\do lcase [%](db.get%().data());
+    ] \if %.type == bit [proto.set_\do lcase [%](db.get%());
     ] ]
->>>>>>> b86e2950590ad2efcacd6ae36738fa6a9ef5f941
 }
 
 
