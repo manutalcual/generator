@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-26 10:18:21 manuel>
+// Time-stamp: <2016-01-27 23:06:49 manuel>
 //
 //
 // Includes
@@ -126,7 +126,7 @@ namespace sys {
 			++i;
 			if (_str[i] == '+') {
 				++i;
-				skip_blanks (i);
+				skip_between (i);
 				num = capture_num(i);
 				s += sys::atoi(num);
 			}
@@ -188,26 +188,26 @@ namespace sys {
 		oper = capture_oper(i);
 		skip_blanks (i);
 		op2 = escapa(i, ' ');
-		skip_blanks (i);
+		skip_between (i);
 
 		if (oper == "==") {
 			if (op1 == op2) {
 				run_block (i, word);
-				skip_blanks (i);
+				skip_between (i);
 				skip_bloque (i);
 			} else {
 				skip_bloque (i);
-				skip_blanks (i);
+				skip_between (i);
 				run_block (i, word);
 			}
 		} else if (oper == "!=") {
 			if (op1 != op2) {
 				run_block (i, word);
-				skip_blanks (i);
+				skip_between (i);
 				skip_bloque (i);
 			} else {
 				skip_bloque (i);
-				skip_blanks (i);
+				skip_between (i);
 				run_block (i, word);
 			}
 		}
@@ -254,13 +254,13 @@ namespace sys {
 		int scope_depth = 0;  // we consider this to be our initial
 							  // scope, now
 
-		skip_blanks (i);
+		skip_between (i);
 
 		if (_str[i] == '[')
 			++i; // skip '[' that's a MUST
 		else {
 			subelem = capture_word(i);
-			skip_blanks (i);
+			skip_between (i);
 			++i; // skip '['
 			if (!look_for_subelement(subelem, scope_depth)) {
 				logp (sys::e_crit, "Subelement '"
@@ -326,7 +326,8 @@ namespace sys {
 		if (pcom) {
 			sys::IComando & com = *pcom;
 
-			skip_blanks (i);
+			skip_between (i);
+			// TODO verify it is really at block begin
 			tmp = escapa(++i, ']');
 			++i; // skip '['
 			com << tmp;
@@ -410,16 +411,14 @@ namespace sys {
 
 	void parser::skip_bloque (int & i)
 	{
-		std::string word;
 		int llaves = 1;
 
-		// Skip onlo if it is really a code b
+		// Skip onlo if it is really a code block
 		if (_str[i] != '[')
 			return;
 		
 		++i; // Skip '['
 		while (i < _size && llaves) {
-			word += _str[i];
 			if (_str[i] == ']') {
 				--llaves;
 			} else if (_str[i] == '[') {  
@@ -434,6 +433,12 @@ namespace sys {
 		std::string word;
 		while (i < _size && (::isblank(_str[i]) /* || _str[i] == '\n' */))
 			word += _str[i++];
+	}
+
+	void parser::skip_between (int & i)
+	{
+		while ((i < _size) && (::isblank(_str[i]) || (_str[i] == '\n')))
+			++i;
 	}
 
 	void parser::push_scope (scope_t & scope)

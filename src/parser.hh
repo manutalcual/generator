@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-23 13:07:32 manuel>
+// Time-stamp: <2016-01-27 23:06:48 manuel>
 //
 // Includes
 //
@@ -92,6 +92,7 @@ namespace sys {
 		
 
 		void skip_blanks (int & i);
+		void skip_between (int & i);
 		void skip_bloque (int & i);
 		void push_scope (scope_t & scope);
 		void pop_scope ();

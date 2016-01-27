@@ -190,7 +190,7 @@ int main (int argc, char ** argv)
 									  
 
 					logp (sys::e_debug, "...");
-					std::string bname ("generated/test" + sys::lower(item->name) + "business.txt");
+					std::string bname ("generated/" + sys::lower(item->name) + ".txt");
 
 
 					//if (stat_body) {
