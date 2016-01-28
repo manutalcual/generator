@@ -60,7 +60,12 @@ void TestDoors::GetByIdDoorsSuccess()
 // Relations
 //
 \for relations[
+
     // Relation %
-    
-]
+    %.table tbl%;
+    tbl%\.set%.set("${_} %");
+    tbl%\.qxInsert();
+    doorsdb.set%(tbl%); ]
+
+    doorsdb.qxInsert();
 
