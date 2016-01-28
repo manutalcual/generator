@@ -43,6 +43,15 @@ AS_IF([test "x$log_domain" != x],
       [AC_DEFINE([LOG_DOMAIN], [$withlog],
                      [Syslog domain log.])])
 
+AC_ARG_WITH([debug],
+ 	AC_HELP_STRING([--with-debug],
+ 	[Build with debug configurations. @<:@default=no@:>@]),
+ 	[with_debug=$withval])
+
+AS_IF([test "x$with_debug" == xyes],
+      [AC_DEFINE([DEBUG], [1],
+                     [Defined if you want debug default configuration options.])])
+
 CFLAGS="-Wall -g $CFLAGS"
 CXXFLAGS="-Wall -g -std=gnu++11"
 

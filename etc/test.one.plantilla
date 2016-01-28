@@ -1,0 +1,39 @@
+//
+//
+//
+// BEGIN $_
+
+\for fields
+[         // %.type % = %#;
+    \if %.type == nvarchar [    doorsdb.set%(QString::fromStdString(doors.\do lcase[%]()));
+]
+    \if %.type == integer [    doorsdb.set%(doors.\do lcase[%]());
+]
+    \if %.type == bit [    doorsdb.set%(doors.\do lcase[%]());
+]
+    \if %.type == blob [    std::string str% = doors.\do lcase[%]();
+    doorsdb.set%(QByteArray(str%.c_str(), str%.size()));
+]
+    \if %.type == int64 [    doorsdb.set%(doors.\do lcase[%]);
+]
+    \if %.type == datetime [    QDateTime dt% = QDateTime::fromTime_t(doors.\do lcase[%]());
+    QTime time = dt%\.time();
+    dt%\.setTime(QTtime(time.hour(), time.minute()));
+    doorsdb.set%(dt%);
+    // doorsdb.set%(QDateTime::currentDateTime().toTime_t());
+]
+]
+
+//
+// Relations
+//
+\for relations[
+
+    // Relation %
+    %.table tbl%;
+    tbl%\.set%.set("${_} %");
+    tbl%\.qxInsert();
+    doorsdb.set%(tbl%); ]
+
+    doorsdb.qxInsert();
+

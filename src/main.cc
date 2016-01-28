@@ -20,6 +20,11 @@
 //
 #include "main.hh"
 
+#ifdef DEBUG
+const char * const CONF_FILE_NAME = "../etc/hulk.conf";
+#else
+const char * const CONF_FILE_NAME = "/etc/hulk.conf";
+#endif
 
 sys::opt::opt_t options[] = {
     {
@@ -27,8 +32,20 @@ sys::opt::opt_t options[] = {
         "Display this help", NULL
     },
     {
-        'f', "conf-file", NULL, sys::opt::e_required, 0,
-        "Configuration file to load.", "hulk.conf"
+        'f', "conf-file", NULL, sys::opt::e_optional, 0,
+        "Configuration file to load.", CONF_FILE_NAME
+    },
+    {
+        'p', "conf-path", NULL, sys::opt::e_optional, 0,
+        "Internal configuration file path to follow when generating sources.", "sys/main/subprojects"
+    },
+    {
+        'o', "output", NULL, sys::opt::e_optional, 0,
+        "Output file name.", "generated_output.txt"
+    },
+    {
+        't', "template", NULL, sys::opt::e_required, 0,
+        "Template file to generate code based on.", ""
     },
     {
         NULL
@@ -51,32 +68,50 @@ int main (int argc, char ** argv)
 		}
 
 		if (! opts) {
-			logp (sys::e_crit, "Must give a configuration file.");
+			logp (sys::e_crit, "Must give a template file.");
+			std::cerr << "Must give a template file." << std::endl;
 			::exit (-1);
 		}
 
-		std::string fname;
+		std::string conf_name;
+		std::string conf_path;
+		std::string output_name;
+		std::string template_file;
 
 		if (opts["conf-file"]->is_set())
-			fname = opts["conf-file"]->param();
+			conf_name = opts["conf-file"]->param();
 		else
-			fname = "hulk.conf";
+			conf_name = opts["conf-file"]->_default;
 
+		if (opts["conf-path"]->is_set())
+			conf_path = opts["conf-path"]->param();
+		else
+			conf_path = opts["conf-path"]->_default;
 
+		if (opts["output"]->is_set())
+			output_name = opts["ouput"]->param();
+		else
+			output_name = opts["output"]->_default;
 
-		//return 0;
+		if (opts["template"]->is_set())
+			output_name = opts["tempate"]->param();
 
-		sys::stat_t stat_conf (fname);
+		logp (sys::e_debug, "Configuration file: " << conf_name << ".");
+		logp (sys::e_debug, "Configuration path: " << conf_path << ".");
+		logp (sys::e_debug, "Template file:      " << template_file << ".");
+		logp (sys::e_debug, "Output file:        " << output_name << ".");
+
+		sys::stat_t stat_conf (conf_name);
 		if (! stat_conf) {
 			app::use (argv);
 			std::cerr << "There is no such file '"
-					  << fname
+					  << conf_name
 					  << "'."
 					  << std::endl;
 			::exit (-1);
 		}
 
-		sys::map_file map (fname);
+		sys::map_file map (conf_name);
 		sys::conf conf (map[0]);
 
 		if (! conf.parse()) {
@@ -84,163 +119,33 @@ int main (int argc, char ** argv)
 			return -1;
 		}
 
-		sys::conf::block_t * b = conf.find("sys");
-
-		logp (sys::e_debug, "System: "
-			  << b->name
-			  << ".");
-
-		sys::conf::block_t * main = conf.find("sys/main/subprojects");
+		sys::conf::block_t * main = conf.find(conf_path);
 		if (! main)
-			throw "Can'f find 'sys/main' element in main.cc.";
+			throw "Can'f find internal configuration path element in "
+				"config file (this is in main.cc, just at the beggining).";
 
-		sys::conf::block_t * sub = main; //->subelements["subprojects"];
 		sys::conf::block_t::mapblock_t::
-			iterator itb = sub->subelements.begin();
+			iterator itb = main->subelements.begin();
 		sys::conf::block_t::mapblock_t::
-			iterator ite = sub->subelements.end();
+			iterator ite = main->subelements.end();
 
 		for (; itb != ite; ++itb) {
 			auto data = *itb;
-			if (data->values["type"] == "lib") {
-				std::string name = data->values["name"];
-				std::string lib_name = data->values["gen"];
-				auto lib = conf.find("sys/" + lib_name);
+			sys::parser the_parser (template_file,
+									(*itb)->name,
+									*(*itb));
 
-#if 0 // html
-				sys::parser indice_text ("../etc/web.index.plantilla",
-										 lib->name,
-										 *lib);
-
-				std::string pname ("generated/index.html");
-				sys::stat_t stat_indice (pname);
-
-				std::ofstream indice (pname);
-				if (! indice.is_open()) {
-					logp (sys::e_crit, "NO INDICE FILE!!! " << pname);
-					throw "Can't create indice file";
+			if (opts["output"]->is_set()) {
+				std::string pname (output_name);
+				sys::stat_t stat_indice (output_name);
+				std::ofstream file (output_name);
+				if (! file.is_open()) {
+					logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
+					throw "Can't create output file";
 				}
-
-				std::cout << indice_text.resultado() << std::endl;
-				indice << indice_text.resultado();
-#endif
-
-#if 0 // protos
-				sys::parser proto_text ("../etc/hulk.proto.plantilla",
-										lib->name,
-										*lib);
-
-				std::string pname ("generated/hulk.proto");
-				//sys::stat_t stat_proto (pname);
-
-				//if (stat_proto) {
-				//	sys::file_system::safe_mv (pname, pname + ".old");
-				//}
-
-				std::ofstream proto (pname);
-				if (! proto.is_open()) {
-					logp (sys::e_crit, "NO PROTO FILE!!! " << pname);
-					throw "Can't create proto file";
-				}
-
-				std::cout << proto_text.resultado() << std::endl;
-				proto << proto_text.resultado();
-
-				return 0;
-#endif
-
-				auto begin = lib->subelements.begin();
-				auto end = lib->subelements.end();
-				for (; begin != end; ++begin) {
-					auto item = *begin;
-					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 1 // business
-					/* business header
-					sys::parser header_text ("../etc/test.header.plantilla",
-											 item->name,
-											 *(item->subelements.begin()->second));
-
-					std::string hname ("generated/test" + sys::lower(item->name) + "business.h");
-					sys::stat_t stat_header (hname);
-
-					//if (stat_header) {
-					//	sys::file_system::safe_mv (hname, hname + ".old");
-					//}
-
-					std::ofstream header (hname);
-					if (! header.is_open()) {
-						logp (sys::e_crit, "NO HEADER FILE!!! " << hname);
-						throw "Can't create header file";
-					}
-
-					header << header_text.resultado();
-					std::cout << header_text.resultado() << std::endl;
-					*/
-					
-					/* business body
-					 */
-					logp (sys::e_debug, "...");
-					sys::parser body_text ("../etc/test.doors.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					logp (sys::e_debug, "...");
-					std::string bname ("generated/" + sys::lower(item->name) + ".txt");
-
-
-					//if (stat_body) {
-					//	sys::file_system::safe_mv (bname, bname + ".old");
-					//}
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-					//break;
-#endif
-#if 0 // html
-					sys::parser body_text ("../etc/web.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					std::string bname ("generated/" + sys::lower(item->name) + ".html");
-					sys::stat_t stat_body (bname);
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-#endif
-#if 0
-					sys::parser body_text ("../etc/web.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					std::string bname ("generated/" + sys::lower(item->name) + ".html");
-					sys::stat_t stat_body (bname);
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-					break;
-#endif
-				}
+				file << the_parser.resultado();
+			} else {
+				std::cout << the_parser.resultado() << std::endl;
 			}
 		}
 
