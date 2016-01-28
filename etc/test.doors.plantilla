@@ -2,17 +2,65 @@
 //
 //
 // BEGIN $_
+
+void TestDoors::GetByIdDoorsSuccess()
+{
+    QSqlError error;
+
+    ByHulk::HulkGetById message;
+    Doors doorsdb;
+
+    message.set_queryentity(ByHulkEnum::HulkEntityType::Doors);
+
+    ByBase::MessageHeader *messageHeader = CreateHeader(message);
+    messageHeader->set_action(ByHulkEnum::HulkActions::GetById);
+    messageHeader->set_entity(ByHulkEnum::HulkEntityType::HulkGetById);
+
+    message.set_id(1);
+
+    QByteArray requestMessage = ProtoBuf::Serialize(message);
+
+    IncomingMessageProcessor processor;
+    QByteArray response = processor.ProcessMessage(requestMessage);
+
+    Bytech::Hulk::MessageExchange m;
+    ProtoBuf::Deserialize(response, m);
+
+    QVERIFY2((m.header().header().entity() == ByHulkEnum::HulkEntityType::Doors), "Error GetById Success Item");
+    QVERIFY2((m.header().header().action() == Bytech::Hulk::Enums::HulkActions::Ok), "Error GetById success");
+
+    Bytech::Hulk::Doors doors;
+    ProtoBuf::Deserialize(response, doors);
+
+    doorsdb.setId(1);
+    doorsdb.qxFetchById();
+
 \for fields
-[\if %.type == nvarchar [    message.set%("STRING"); // % %#
+[         // %.type % = %#;
+    \if %.type == nvarchar [    doorsdb.set%(QString::fromStdString(doors.\do lcase[%]()));
 ]
-    \if %.type == integer [    message.set%(1); // % %#
+    \if %.type == integer [    doorsdb.set%(doors.\do lcase[%]());
 ]
-    \if %.type == bit [    message.set%(true); // % %#
+    \if %.type == bit [    doorsdb.set%(doors.\do lcase[%]());
 ]
-    \if %.type == blob [    message.set%("BLOB DATA", 10); // % %#
+    \if %.type == blob [    std::string str% = doors.\do lcase[%]();
+    doorsdb.set%(QByteArray(str%.c_str(), str%.size()));
 ]
-    \if %.type == int64 [    message.set%(1); // % %#
+    \if %.type == int64 [    doorsdb.set%(doors.\do lcase[%]);
 ]
-    \if %.type == datetime [    message.set%(QDateTime::currentDateTime().toTime_t()); // % %#
+    \if %.type == datetime [    QDateTime dt% = QDateTime::fromTime_t(doors.\do lcase[%]());
+    QTime time = dt%\.time();
+    dt%\.setTime(QTtime(time.hour(), time.minute()));
+    doorsdb.set%(dt%);
+    // doorsdb.set%(QDateTime::currentDateTime().toTime_t());
 ]
 ]
+
+//
+// Relations
+//
+\for relations[
+    // Relation %
+    
+]
+
