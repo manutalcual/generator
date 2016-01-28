@@ -2,7 +2,7 @@
 // Clase: parser Copyright (c) 2016 ByTech
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Mar 15 16:29:27 2006
-// Time-stamp: <2016-01-27 23:06:49 manuel>
+// Time-stamp: <2016-01-27 23:46:25 manuel>
 //
 //
 // Includes
@@ -231,11 +231,11 @@ namespace sys {
 		bool found = false;
 
 		for (; beg != end; ++beg) {
-			tblock_t & item = *(beg->second);
+			tblock_t & item = *(*beg);
 
 			if (item.name == element) {
 				scope_t scope;
-				scope.block = beg->second;
+				scope.block = *beg;
 				scope.count = scope.block->subelements.size();
 				scope.index = 0;
 				push_scope (scope);
@@ -284,7 +284,7 @@ namespace sys {
 		int last_pos = i;
 		for (; beg != end; ++beg) {
 			scope_t scope;
-			scope.block = beg->second;
+			scope.block = (*beg);
 			scope.begin = beg;
 			scope.end = end;
 			scope.count = scope.block->subelements.size();

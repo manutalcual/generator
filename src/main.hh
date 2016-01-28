@@ -41,8 +41,9 @@
 #include "file.hh"
 #include "stat.hh"
 #include "map_file.hh"
-#include "generator.hh"
 #include "parser.hh"
+
+#include "generator.hh"
 
 #define log_err(x) std::cerr << "Error: " \
 	<< x \

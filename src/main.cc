@@ -31,14 +31,6 @@ sys::opt::opt_t options[] = {
         "Configuration file to load.", "hulk.conf"
     },
     {
-        'c', "class", NULL, sys::opt::e_optional, 0,
-        "Configuration file to load.", "hulk.conf"
-    },
-    {
-        'o', "output", NULL, sys::opt::e_optional, 0,
-        "Configuration file to load.", "hulk.conf"
-    },
-    {
         NULL
     }
 };
@@ -70,6 +62,10 @@ int main (int argc, char ** argv)
 		else
 			fname = "hulk.conf";
 
+
+
+		//return 0;
+
 		sys::stat_t stat_conf (fname);
 		if (! stat_conf) {
 			app::use (argv);
@@ -94,18 +90,18 @@ int main (int argc, char ** argv)
 			  << b->name
 			  << ".");
 
-		sys::conf::block_t * main = conf.find("sys/main");
+		sys::conf::block_t * main = conf.find("sys/main/subprojects");
 		if (! main)
 			throw "Can'f find 'sys/main' element in main.cc.";
 
-		sys::conf::block_t * sub = main->subelements["subprojects"];
+		sys::conf::block_t * sub = main; //->subelements["subprojects"];
 		sys::conf::block_t::mapblock_t::
 			iterator itb = sub->subelements.begin();
 		sys::conf::block_t::mapblock_t::
 			iterator ite = sub->subelements.end();
 
 		for (; itb != ite; ++itb) {
-			auto data = itb->second;
+			auto data = *itb;
 			if (data->values["type"] == "lib") {
 				std::string name = data->values["name"];
 				std::string lib_name = data->values["gen"];
@@ -156,7 +152,7 @@ int main (int argc, char ** argv)
 				auto begin = lib->subelements.begin();
 				auto end = lib->subelements.end();
 				for (; begin != end; ++begin) {
-					auto item = begin->second;
+					auto item = *begin;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
 #if 1 // business
 					/* business header
@@ -205,7 +201,7 @@ int main (int argc, char ** argv)
 
 					body << body_text.resultado();
 					std::cout << body_text.resultado() << std::endl;
-					break;
+					//break;
 #endif
 #if 0 // html
 					sys::parser body_text ("../etc/web.plantilla",
@@ -280,7 +276,7 @@ namespace app {
 		std::cout << argv[0] << " (C) 2015 By Tech" << std::endl;
 
 		for (int i = 0; options[i]._long_name; ++i) {
-			std::cout << "\t--"
+			std::cout << "\t -"
 					  << (options[i]._opt_name ? options[i]._opt_name : ' ')
 					  << "\t--"
 					  << (options[i]._long_name ? options[i]._long_name : "")

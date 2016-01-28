@@ -38,9 +38,10 @@ generator_SOURCES = common.hh common.cc \
 	map_file.hh map_file.cc \
 	comandos.hh comandos.cc \
 	parser.hh parser.cc \
-	generator.hh generator.cc \
 	main.hh main.cc
 
+#	generator.hh generator.cc \
+#
 # db_SOURCES = common.hh common.cc \
 # 	opt.hh opt.cc \
 # 	db.hh db.cc

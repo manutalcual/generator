@@ -3,7 +3,7 @@
 // Autor: Manuel Cano Muñoz
 // Fecha: Wed Sep 15 13:07:05 2010
 
-// Time-stamp: <2016-01-26 10:24:10 manuel>
+// Time-stamp: <2016-01-27 23:17:42 manuel>
 //
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -115,16 +115,16 @@ namespace sys {
             nlogp (sys::e_debug, "Block name: " << itb->second->name
                   << "; looking for: " << fname);
 
-            if (itb->second->name == fname) {
+            if ((*itb)->name == fname) {
                 nlogp (sys::e_debug, "This is the name.");
                 size_t p = bname.find("/");
                 if (p != std::string::npos) {
                     bname = bname.substr(p + 1);
                     nlogp (sys::e_debug, "Next name to look for: "
                           << bname);
-                    ret = find(bname, itb->second);
+                    ret = find(bname, *itb);
                 } else {
-                    ret = itb->second;
+                    ret = *itb;
                 }
             }
         }
@@ -196,7 +196,7 @@ namespace sys {
             newblock->name = bname;
             newblock->parent = _last;
             
-            _last->subelements[bname] = newblock;
+            _last->subelements.push_back (newblock);
             _last = newblock;
 
             do {
@@ -336,8 +336,8 @@ namespace sys {
 
         for (; itb != ite; ++itb) {
             nlogp (sys::e_debug, "Block name: " << itb->second->name);
-            if (itb->second->subelements.size())
-                block (itb->second);
+            if ((*itb)->subelements.size())
+                block (*itb);
         }
     }
 
