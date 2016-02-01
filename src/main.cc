@@ -30,6 +30,7 @@ const char * const TEMPLATE = "template";
 const char * const CONF_FILE = "conf-file";
 const char * const CONF_PATH = "conf-path";
 const char * const OUTPUT = "output";
+const char * const LOOP = "loop";
 
 sys::opt::opt_t options[] = {
     {
@@ -53,10 +54,23 @@ sys::opt::opt_t options[] = {
         "Template file to generate code based on.", "no_template"
     },
     {
+        'l', LOOP, NULL, sys::opt::e_optional, 0,
+        "Loop through subelements.", "no"
+    },
+    {
         NULL
     }
 };
 
+
+template<int T>
+class kakita
+{
+public:
+	char str[T];
+};
+
+kakita<5> kakota;
 
 int main (int argc, char ** argv)
 {
@@ -81,6 +95,7 @@ int main (int argc, char ** argv)
 		std::string conf_path;
 		std::string output_name;
 		std::string template_file;
+		bool loop = false;
 
 		if (opts[CONF_FILE]->is_set())
 			conf_file = opts[CONF_FILE]->param();
@@ -100,10 +115,14 @@ int main (int argc, char ** argv)
 		if (opts[TEMPLATE]->is_set())
 			template_file = opts[TEMPLATE]->param();
 
+		if (opts[LOOP]->is_set())
+			loop = (::strcasecmp(opts[TEMPLATE]->param(), "yes") == 0) ;
+
 		logp (sys::e_debug, "Configuration file: " << conf_file << ".");
 		logp (sys::e_debug, "Configuration path: " << conf_path << ".");
 		logp (sys::e_debug, "Template file:      " << template_file << ".");
 		logp (sys::e_debug, "Output file:        " << output_name << ".");
+		logp (sys::e_debug, "Loop subelements:   " << loop << ".");
 
 		sys::stat_t stat_conf (conf_file);
 		if (! stat_conf) {
@@ -137,23 +156,42 @@ int main (int argc, char ** argv)
 			  << main->name
 			  << "'.");
 
-		sys::parser the_parser (template_file,
-								main->name,
-								*main);
+		if (loop) {
+			for (; itb != ite; ++itb) {
+				sys::parser the_parser (template_file,
+										(*itb)->name,
+										*(*itb));
 		
-		if (opts["output"]->is_set()) {
-			std::string pname (output_name);
-			sys::stat_t stat_indice (output_name);
-			std::ofstream file (output_name);
-			if (! file.is_open()) {
-				logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
-				throw "Can't create output file";
+				if (opts["output"]->is_set()) {
+					std::string pname ((*itb)->name + "_" + output_name);
+					std::ofstream file (pname);
+					if (! file.is_open()) {
+						logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
+						throw "Can't create output file";
+					}
+					file << the_parser.resultado();
+				} else {
+					std::cout << the_parser.resultado() << std::endl;
+				}
 			}
-			file << the_parser.resultado();
 		} else {
-			std::cout << the_parser.resultado() << std::endl;
+			sys::parser the_parser (template_file,
+									main->name,
+									*main);
+		
+			if (opts["output"]->is_set()) {
+				std::string pname (output_name);
+				sys::stat_t stat_indice (output_name);
+				std::ofstream file (output_name);
+				if (! file.is_open()) {
+					logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
+					throw "Can't create output file";
+				}
+				file << the_parser.resultado();
+			} else {
+				std::cout << the_parser.resultado() << std::endl;
+			}
 		}
-
 		/*
 		  app::generator gen (conf);
 

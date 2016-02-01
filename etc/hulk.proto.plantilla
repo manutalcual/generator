@@ -61,7 +61,7 @@ message HulkDelete {
 
 \for [message % {
     required Bytech.Hulk.BaseHeader Header = 1;
-\for fields [    optional \if %.type == nvarchar [string ] \if %.type == integer [int32 ] \if %.type == datetime [long ] \if %.type == long [long ] \if %.type == blob [bytes ] \if %.type == bit [long ]  % = %#+1;
+\for fields [    optional \if %.type == nvarchar [string ] \if %.type == int64 [int64 ] \if %.type == integer [int32 ] \if %.type == datetime [int32 ] \if %.type == long [int32 ] \if %.type == blob [bytes ] \if %.type == bit [bool ]  % = %#+1;
 ] }
 ]
 

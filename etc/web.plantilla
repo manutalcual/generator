@@ -198,7 +198,11 @@
                      msg.Id = parseInt(document.getElementById("Id").value);
 
                      \for fields [
-                             \if %.type == integer [
+                             \if %.type == int64 [
+                                 msg.% = parseInt(document.getElementById("%").value);
+                             ] \if %.type == int32 [
+                                 msg.% = parseInt(document.getElementById("%").value);
+                             ]\if %.type == integer [
                                  msg.% = parseInt(document.getElementById("%").value);
                              ] \if %.type == nvarchar [
                                  msg.% = document.getElementById("%").value;
@@ -208,6 +212,8 @@
                                  msg.% = document.getElementById("%").value;
                              ] \if %.type == datetime [
                                  msg.% = document.getElementById("%").value;
+                             ] \if %.type == bool [
+                                 msg.% = parseInt(document.getElementById("%").value);
                              ]
                          ]
                      socket.send (msg.toArrayBuffer());
