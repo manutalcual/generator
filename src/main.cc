@@ -26,32 +26,36 @@ const char * const CONF_FILE_NAME = "../etc/hulk.conf";
 const char * const CONF_FILE_NAME = "/etc/hulk.conf";
 #endif
 
+const char * const TEMPLATE = "template";
+const char * const CONF_FILE = "conf-file";
+const char * const CONF_PATH = "conf-path";
+const char * const OUTPUT = "output";
+
 sys::opt::opt_t options[] = {
     {
         'h', "help", NULL, sys::opt::e_optional, 0,
         "Display this help", NULL
     },
     {
-        'f', "conf-file", NULL, sys::opt::e_optional, 0,
+        'f', CONF_FILE, NULL, sys::opt::e_optional, 0,
         "Configuration file to load.", CONF_FILE_NAME
     },
     {
-        'p', "conf-path", NULL, sys::opt::e_optional, 0,
+        'p', CONF_PATH, NULL, sys::opt::e_optional, 0,
         "Internal configuration file path to follow when generating sources.", "sys/main/subprojects"
     },
     {
-        'o', "output", NULL, sys::opt::e_optional, 0,
+        'o', OUTPUT, NULL, sys::opt::e_optional, 0,
         "Output file name.", "generated_output.txt"
     },
     {
-        't', "template", NULL, sys::opt::e_required, 0,
-        "Template file to generate code based on.", ""
+        't', TEMPLATE, NULL, sys::opt::e_required, 0,
+        "Template file to generate code based on.", "no_template"
     },
     {
         NULL
     }
 };
-
 
 
 int main (int argc, char ** argv)
@@ -73,45 +77,45 @@ int main (int argc, char ** argv)
 			::exit (-1);
 		}
 
-		std::string conf_name;
+		std::string conf_file;
 		std::string conf_path;
 		std::string output_name;
 		std::string template_file;
 
-		if (opts["conf-file"]->is_set())
-			conf_name = opts["conf-file"]->param();
+		if (opts[CONF_FILE]->is_set())
+			conf_file = opts[CONF_FILE]->param();
 		else
-			conf_name = opts["conf-file"]->_default;
+			conf_file = opts[CONF_FILE]->_default;
 
-		if (opts["conf-path"]->is_set())
-			conf_path = opts["conf-path"]->param();
+		if (opts[CONF_PATH]->is_set())
+			conf_path = opts[CONF_PATH]->param();
 		else
-			conf_path = opts["conf-path"]->_default;
+			conf_path = opts[CONF_PATH]->_default;
 
-		if (opts["output"]->is_set())
-			output_name = opts["ouput"]->param();
+		if (opts[OUTPUT]->is_set())
+			output_name = opts[OUTPUT]->param();
 		else
-			output_name = opts["output"]->_default;
+			output_name = opts[OUTPUT]->_default;
 
-		if (opts["template"]->is_set())
-			output_name = opts["tempate"]->param();
+		if (opts[TEMPLATE]->is_set())
+			template_file = opts[TEMPLATE]->param();
 
-		logp (sys::e_debug, "Configuration file: " << conf_name << ".");
+		logp (sys::e_debug, "Configuration file: " << conf_file << ".");
 		logp (sys::e_debug, "Configuration path: " << conf_path << ".");
 		logp (sys::e_debug, "Template file:      " << template_file << ".");
 		logp (sys::e_debug, "Output file:        " << output_name << ".");
 
-		sys::stat_t stat_conf (conf_name);
+		sys::stat_t stat_conf (conf_file);
 		if (! stat_conf) {
 			app::use (argv);
 			std::cerr << "There is no such file '"
-					  << conf_name
+					  << conf_file
 					  << "'."
 					  << std::endl;
 			::exit (-1);
 		}
 
-		sys::map_file map (conf_name);
+		sys::map_file map (conf_file);
 		sys::conf conf (map[0]);
 
 		if (! conf.parse()) {
@@ -129,30 +133,31 @@ int main (int argc, char ** argv)
 		sys::conf::block_t::mapblock_t::
 			iterator ite = main->subelements.end();
 
-		for (; itb != ite; ++itb) {
-			auto data = *itb;
-			sys::parser the_parser (template_file,
-									(*itb)->name,
-									*(*itb));
+		logp (sys::e_debug, "We begin at '"
+			  << main->name
+			  << "'.");
 
-			if (opts["output"]->is_set()) {
-				std::string pname (output_name);
-				sys::stat_t stat_indice (output_name);
-				std::ofstream file (output_name);
-				if (! file.is_open()) {
-					logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
-					throw "Can't create output file";
-				}
-				file << the_parser.resultado();
-			} else {
-				std::cout << the_parser.resultado() << std::endl;
+		sys::parser the_parser (template_file,
+								main->name,
+								*main);
+		
+		if (opts["output"]->is_set()) {
+			std::string pname (output_name);
+			sys::stat_t stat_indice (output_name);
+			std::ofstream file (output_name);
+			if (! file.is_open()) {
+				logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
+				throw "Can't create output file";
 			}
+			file << the_parser.resultado();
+		} else {
+			std::cout << the_parser.resultado() << std::endl;
 		}
 
 		/*
-		app::generator gen (conf);
+		  app::generator gen (conf);
 
-		gen.make_project ();
+		  gen.make_project ();
 		*/
 	} catch (char * err) {
 		std::cerr << "Exception: " << err << "." << std::endl;
