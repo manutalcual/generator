@@ -58,7 +58,8 @@ sys::opt::opt_t options[] = {
         "Loop through subelements.", "no"
     },
     {
-        NULL
+        NULL, NULL, 0, 0,
+		NULL, NULL
     }
 };
 
@@ -116,7 +117,7 @@ int main (int argc, char ** argv)
 			template_file = opts[TEMPLATE]->param();
 
 		if (opts[LOOP]->is_set())
-			loop = (::strcasecmp(opts[TEMPLATE]->param(), "yes") == 0) ;
+			loop = (::strcasecmp(opts[LOOP]->param(), "yes") == 0) ;
 
 		logp (sys::e_debug, "Configuration file: " << conf_file << ".");
 		logp (sys::e_debug, "Configuration path: " << conf_path << ".");
@@ -163,10 +164,10 @@ int main (int argc, char ** argv)
 										*(*itb));
 		
 				if (opts["output"]->is_set()) {
-					std::string pname ((*itb)->name + "_" + output_name);
+					std::string pname ("generated/" + (*itb)->name + ".html");
 					std::ofstream file (pname);
 					if (! file.is_open()) {
-						logp (sys::e_crit, "NO OUTPUT FILE!!! (" << output_name << ")");
+						logp (sys::e_crit, "NO OUTPUT FILE!!! (" << pname << ")");
 						throw "Can't create output file";
 					}
 					file << the_parser.resultado();
