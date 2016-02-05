@@ -28,7 +28,7 @@ AM_CPPFLAGS =  -Wall -W -DG_LOG_DOMAIN=\"generator\"
 #LIBS = -lboost_serialization  -lQxOrmd -lHulkd  -lQt5Sql -lQt5Core -lpthread
 #-licui18n -licuuc -licudata -lQt5Gui
 
-bin_PROGRAMS = generator
+bin_PROGRAMS = generator lamb
 generator_SOURCES = common.hh common.cc \
 	opt.hh opt.cc \
 	base_parser.hh base_parser.cc \
@@ -39,6 +39,8 @@ generator_SOURCES = common.hh common.cc \
 	comandos.hh comandos.cc \
 	parser.hh parser.cc \
 	main.hh main.cc
+
+lamb_SOURCES = lamb.hh lamb.cc
 
 #	generator.hh generator.cc \
 #
