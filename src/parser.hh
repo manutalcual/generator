@@ -80,6 +80,7 @@ namespace sys {
 		std::string escape_slash (int & i);
 		std::string process_command (std::string command, int & i);
 		std::string process_if (int & i);
+		std::string process_ifcond (std::string command, int & i);
 		void run_block (int & i, std::string & block);
 		bool look_for_subelement (std::string & element, int & depth);
 		std::string process_for (int & i);

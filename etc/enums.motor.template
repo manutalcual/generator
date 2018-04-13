@@ -1,0 +1,13 @@
+// -------------------------------------------------------------------------
+//  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+//  You have been warned.
+// -------------------------------------------------------------------------
+
+
+\for [enum e_\do lcase [%]
+{
+\for fields [    \if %^^addheader == yes [\do lcase [%^^]_]% = %#\ifnot last[,
+]]
+};
+
+]

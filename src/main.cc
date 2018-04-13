@@ -107,6 +107,40 @@ int main (int argc, char ** argv)
 				std::string lib_name = data->values["gen"];
 				auto lib = conf.find("sys/" + lib_name);
 
+#if 1 // protos
+				typedef std::map<const char *, const char *> mapconfs_t;
+				mapconfs_t files {
+					{ "../etc/tables-header.motor.template", "tables.hh" },
+					{ "../etc/tables-body.motor.template", "tables.cc" }
+					/*
+					{ "../etc/enums.motor.template", "enums.hh" },
+					{ "../etc/queries.motor.template", "queries.cc" }
+					*/
+				};
+
+				mapconfs_t::iterator b = files.begin();
+				mapconfs_t::iterator e = files.end();
+
+				for (; b != e; ++b) {
+				
+					sys::parser proto_text (b->first,
+											lib->name,
+											*lib);
+
+					std::string pname (b->second);
+					std::ofstream proto (pname);
+					if (! proto.is_open()) {
+						logp (sys::e_crit, "NO PROTO FILE!!! " << pname);
+						throw "Can't create proto file";
+					}
+					
+				//std::cout << proto_text.resultado() << std::endl;
+					proto << proto_text.resultado();
+				}
+
+				return 0;
+#endif
+				
 #if 0 // html
 				sys::parser indice_text ("../etc/web.index.plantilla",
 										 lib->name,
@@ -125,36 +159,13 @@ int main (int argc, char ** argv)
 				indice << indice_text.resultado();
 #endif
 
-#if 0 // protos
-				sys::parser proto_text ("../etc/hulk.proto.plantilla",
-										lib->name,
-										*lib);
-
-				std::string pname ("generated/hulk.proto");
-				//sys::stat_t stat_proto (pname);
-
-				//if (stat_proto) {
-				//	sys::file_system::safe_mv (pname, pname + ".old");
-				//}
-
-				std::ofstream proto (pname);
-				if (! proto.is_open()) {
-					logp (sys::e_crit, "NO PROTO FILE!!! " << pname);
-					throw "Can't create proto file";
-				}
-
-				std::cout << proto_text.resultado() << std::endl;
-				proto << proto_text.resultado();
-
-				return 0;
-#endif
 
 				auto begin = lib->subelements.begin();
 				auto end = lib->subelements.end();
 				for (; begin != end; ++begin) {
 					auto item = *begin;
 					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 1 // business
+#if 0 // business
 					/* business header
 					sys::parser header_text ("../etc/test.header.plantilla",
 											 item->name,

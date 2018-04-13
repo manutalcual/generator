@@ -1,0 +1,20 @@
+// -------------------------------------------------------------------------
+//  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+//  You have been warned.
+// -------------------------------------------------------------------------
+
+\for [class \do lcase [%]
+{
+public:
+\for fields [    \if %.type == CHAR [char ] \if %.type == NUMBER [int ] \if %.type == DATE [long ] \if %.type == VARCHAR2 [std::string ] \if %.type == CLOB [char ] \if %.type == TIMESTAMP [long ] \if %.type == RAW [unsigned char ] \do lcase [%] \if %.type == CHAR [\[%+3.length\] ];
+]
+
+private:
+    const char * _sql_select;
+    const char * _sql_create;
+    const char * _sql_insert;
+};
+
+]
+
+rs->getNumArrayRows();

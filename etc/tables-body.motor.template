@@ -1,0 +1,37 @@
+// -------------------------------------------------------------------------
+//  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+//  You have been warned.
+// -------------------------------------------------------------------------
+#include "tables.hh"
+
+\for [\do lcase [%]::\do lcase [%] ()
+    : _sql_select ("SELECT \for fields [%\ifnot last[, ]] FROM %\if %.!order != "" [ORDER BY %.order]"),
+      _sql_insert ("INSERT INTO \do lcase [%] (\for fields [%\ifnot last[, ]]) VALUES (\for fields [:p%\ifnot last[, ]])"),
+      _sql_create ("CREATE TABLE % (\for fields [% %.type\if %.type == CHAR [(%.length, BYTE)]\if %.type == NUMBER [(%.length, %.precision)]\if %.type == VARCHAR2 [(%.length)]\if %.type == CLOB [(%.length)]\if %.type == RAW [(%.length)]\ifnot last [, ]])")
+{
+}
+
+\for fields [\if %.type == CHAR [const char ] \if %.type == NUMBER [int ] \if %.type == DATE [long ] \if %.type == VARCHAR2 [string ] \if %.type == CLOB [bytes ] \if %.type == TIMESTAMP [times ] \if %.type == RAW [raw ] \if %.type == CHAR [\[%+3.length\]]\do lcase [ $^]::\do lcase [% ] ()
+{
+}
+
+]
+]
+
+
+CREATE TABLE ZONAHORARIA 
+(
+  H1070_GYZONAHO CHAR(2 BYTE) 
+, H1070_GYPROCC NUMBER(11, 0) 
+, H1070_GYSHORTN CHAR(30 BYTE) 
+, H1070_GYFELOC DATE 
+, H1070_GYFEDAT DATE 
+, H1070_GYMATDAT DATE 
+, H1070_GYACTIVO CHAR(1 BYTE) DEFAULT '0' 
+, H1070_GYVAHOR1 NUMBER(11, 0) 
+, H1070_GYAGRHOR NUMBER(11, 0) 
+, H1070_GYULPROC CHAR(1 BYTE) 
+, H1070_GYVALREM NUMBER(11, 0) 
+, H1070_GYORDEN NUMBER(5, 0) 
+, H1070_GYAGRREM NUMBER(11, 0) 
+) 

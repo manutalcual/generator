@@ -1,0 +1,16 @@
+// -------------------------------------------------------------------------
+//  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
+//  You have been warned.
+// -------------------------------------------------------------------------
+#include <map>
+#include "enums.hh"
+#include "tables.hh"
+
+typedef std::map<const char *, const char *> mapqueries_t;
+
+mapqueries_t mapqueries{
+\for [{"\do lcase [%]",   "SELECT \for fields [%, ] FROM %\if %.!order != "" [ORDER BY %.order]"}\ifnot last [,
+]
+]
+};
+

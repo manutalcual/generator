@@ -1,63 +1,7 @@
 // -------------------------------------------------------------------------
 //  DO NOT modify this file, it's being generated so it WILL BE OVERWRITED!!
-//  You have been warned."
+//  You have been warned.
 // -------------------------------------------------------------------------
-
-syntax = "proto2";
-package Bytech.Hulk;
-import "base.proto";
-import "hulk.enums.proto";
-
-message HulkFilter {
-    //
-    // Ranges delimited with semicolon (20140101;20150101)
-    // Bool: 0 false, 1 true
-    // Dates: YYYYMMDDHHMMSS
-    // Thousand separator: . (dot)
-    //
-    required string Field = 1;
-    required string ValueFrom = 2;
-    required string ValueTo = 3;
-}
-
-message BaseHeader {
-    required Bytech.Base.MessageHeader Header = 1;
-    optional string SessionId = 2;
-}
-
-message MessageExchange {
-    required BaseHeader Header = 1;
-}
-
-message HulkError {
-    required Bytech.Hulk.BaseHeader Header = 1;
-    required Bytech.Hulk.Enums.HulkSeverity Severity = 2;
-    required Bytech.Hulk.Enums.HulkError ErrorCode = 3;
-    required string ErrorDescription = 4;       
-}
-
-message HulkResult {
-    required Bytech.Hulk.BaseHeader Header = 1;
-    repeated HulkError Errors = 2;
-}
-
-message HulkGetAll {
-    required Bytech.Hulk.BaseHeader Header = 1;
-    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
-    repeated HulkFilter Filters = 3;
-}
-
-message HulkGetById {
-    required Bytech.Hulk.BaseHeader Header = 1;
-    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
-    required int32 Id = 3;
-}
-
-message HulkDelete {
-    required Bytech.Hulk.BaseHeader Header = 1;
-    required Bytech.Hulk.Enums.HulkEntityType QueryEntity = 2;
-    required int32 Id = 3;
-}
 
 \for [message % {
     required Bytech.Hulk.BaseHeader Header = 1;
