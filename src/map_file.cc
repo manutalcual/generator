@@ -74,6 +74,11 @@ namespace sys {
 				::close (_fd);
 				_fd = -1;
 			}
+		} else {
+			std::string ex ("File '");
+			ex += fname;
+			ex += "' doesn't exists";
+			throw std::invalid_argument(ex);
 		}
 	}
 

@@ -35,7 +35,7 @@ namespace sys {
           _param_list (NULL),
           _ok (true)
     {
-		nflog ();
+		flog ();
         intern_options ();
         parse_options ();
         asign_parameters ();
@@ -49,30 +49,30 @@ namespace sys {
 
     opt::opt_t * opt::operator [] (std::string path)
     {
-		nlogp (sys::e_debug, "operator: " << path);
+		logp (sys::e_debug, "operator: " << path);
         return _opts[path];
     }
 
     opt::opt_t * opt::operator [] (const char * path)
     {
-		nlogp (sys::e_debug, "operator: " << path);
+		logp (sys::e_debug, "operator: " << path);
         return _opts[path];
     }
 
     void opt::intern_options ()
     {
-        nflog ();
+        flog ();
         opt_t * o = _user_opts[0];
 
         for (; o->_long_name; ++o) {
-            nlogp (sys::e_debug, "Name: " << o->_long_name);
+            logp (sys::e_debug, "Name: " << o->_long_name);
             _opts[o->_long_name] = o;
         }
     }
 
     void opt::parse_options ()
     {
-		nflog ();
+		flog ();
 
         for (int i = 1; i < _argc; ++i) {
             if (_argv[i][0] == '-' && _argv[i][1] == '-') {
@@ -88,13 +88,13 @@ namespace sys {
 
     void opt::asign_parameters ()
     {
-        nflog ();
+        flog ();
 
         opt_t * o = _user_opts[0];
         param_list_t * p = _param_list;
 
         for (; o->_long_name; ++o) {
-			nlogp (sys::e_debug, "Option: " << o->_long_name);
+			logp (sys::e_debug, "Option: " << o->_long_name);
 
             if ((o->_flags & e_required) && !(o->_flags & e_set))
                 _ok = false;
@@ -104,16 +104,19 @@ namespace sys {
                 param_list_t * pl = p;
 
 				if (! pl) {
-					nlogp (sys::e_debug, "There is no parameter list!");
+					logp (sys::e_debug, "There is no parameter list!");
+                    std::string ex ("There is no parameter for ");
+                    ex += o->_long_name;
+                    throw ex;
 				}
 
                 for (; pl && pl->next; pl = pl->next) {
-					nlogp (sys::e_debug, "Append parameter: " << pl->param);
+					logp (sys::e_debug, "Append parameter: " << pl->param);
                     append_parameter (o, pl->param);
 				}
 
                 if (pl) {
-					nlogp (sys::e_debug, "Append parameter: " << pl->param);
+					logp (sys::e_debug, "Append parameter: " << pl->param);
                     append_parameter (o, pl->param);
 					p = pl->next;
 				}
@@ -124,11 +127,14 @@ namespace sys {
                 param_list_t * pl = p;
 
 				if (! pl) {
-					nlogp (sys::e_debug, "There is no parameter list!");
+					logp (sys::e_debug, "There is no parameter list!");
+                    std::string ex ("There is no parameter for ");
+                    ex += o->_long_name;
+                    throw ex;
 				}
 
                 if (pl) {
-					nlogp (sys::e_debug, "Append parameter: " << pl->param);
+					logp (sys::e_debug, "Append parameter: " << pl->param);
                     append_parameter (o, pl->param);
 					p = pl->next;
 				}
@@ -150,7 +156,7 @@ namespace sys {
 
     void opt::parse_short_option (int i)
     {
-        nflog ();
+        flog ();
 		char * argv = &_argv[i][1]; // assume it begins with "-"
         int count = ::strlen(argv);
 
@@ -161,7 +167,7 @@ namespace sys {
 
     void opt::parse_long_option (int i)
     {
-        nflog ();
+        flog ();
 		char * argv = &_argv[i][2]; // assume it begins with "--"
         char * equal = ::strchr(argv, '=');
 
@@ -178,13 +184,13 @@ namespace sys {
                 append_parameter (o, equal);
 
 		} else {
-			nlogp (sys::e_warning, argv << " isn't known, ignoring it");
+			logp (sys::e_warning, argv << " isn't known, ignoring it");
 		}
     }
 
     void opt::parse_parameter (int i)
     {
-        nflog ();
+        flog ();
 
         if (_param_list) {
             param_list_t * np = search_first_free_param(_param_list);
@@ -197,19 +203,19 @@ namespace sys {
 
     void opt::append_parameter (opt_t * o, char * param)
     {
-        nflog ();
+        flog ();
 
         if (o->_parameters) {
             if (o->_flags & e_many) {
                 param_list_t * p = search_first_free_param(o);
                 append_parameter_item (p, param);
             } else {
-                nlogp (sys::e_debug, "This option do not accept "
+                logp (sys::e_debug, "This option do not accept "
                       "multiple parameters.");
-                nlogp (sys::e_debug, "Ignoring '" << param << "'.");
+                logp (sys::e_debug, "Ignoring '" << param << "'.");
             }
         } else {
-			nlogp (sys::e_debug, "appending parameter: " << param
+			logp (sys::e_debug, "appending parameter: " << param
 				  << " in " << o->_long_name);
             o->_parameters = new param_list_t;
             o->_parameters->param = param;
@@ -218,7 +224,7 @@ namespace sys {
 
     void opt::set_short_option (char ch)
     {
-        nflog ();
+        flog ();
         opt_t * o = _user_opts[0];
 
         for (; o->_long_name; ++o) {
@@ -231,7 +237,7 @@ namespace sys {
 
     opt::param_list_t * opt::search_first_free_param (opt_t * o)
     {
-        nflog ();
+        flog ();
 
         param_list_t * pl = o->_parameters;
 
@@ -243,7 +249,7 @@ namespace sys {
 
     opt::param_list_t * opt::search_first_free_param (opt::param_list_t * p)
     {
-        nflog ();
+        flog ();
 
         param_list_t * pl = p;
 
@@ -255,9 +261,9 @@ namespace sys {
 
     void opt::append_parameter_item (param_list_t * p, char * param)
     {
-        nflog ();
+        flog ();
 
-		nlogp (sys::e_debug, "appending parameter: " << param);
+		logp (sys::e_debug, "appending parameter: " << param);
 
         p->next = new param_list_t;
         p->next->param = param;

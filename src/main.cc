@@ -28,7 +28,11 @@ sys::opt::opt_t options[] = {
     },
     {
         'f', "conf-file", NULL, sys::opt::e_required, 0,
-        "Configuration file to load.", "hulk.conf"
+        "Configuration file to load.", "generator.conf"
+    },
+    {
+        'd', "conf-dir", NULL, sys::opt::e_required, 0,
+        "Directory to load templates from.", "$HOME/etc"
     },
     {
         NULL
@@ -44,7 +48,7 @@ int main (int argc, char ** argv)
 	try {
 
 		sys::opt opts (argc, argv, options);
-
+		logp (sys::e_debug, "Parameters readed, continuing.");
 		if (opts["help"]->is_set()) {
 			app::use (argv);
 			::exit (0);
@@ -55,16 +59,20 @@ int main (int argc, char ** argv)
 			::exit (-1);
 		}
 
+		std::string dname;
+		if (opts["conf-dir"]->is_set()) {
+			dname = opts["conf-dir"]->param();
+		} else {
+			const char * path = getenv("HOME");
+			dname += path;
+			dname += "/etc";
+		}
+
 		std::string fname;
-
 		if (opts["conf-file"]->is_set())
-			fname = opts["conf-file"]->param();
+			fname = dname + "/" + opts["conf-file"]->param();
 		else
-			fname = "hulk.conf";
-
-
-
-		//return 0;
+			fname = dname + "/generator.conf";
 
 		sys::stat_t stat_conf (fname);
 		if (! stat_conf) {
@@ -73,7 +81,7 @@ int main (int argc, char ** argv)
 					  << fname
 					  << "'."
 					  << std::endl;
-			::exit (-1);
+			::exit (-2);
 		}
 
 		sys::map_file map (fname);
@@ -81,7 +89,7 @@ int main (int argc, char ** argv)
 
 		if (! conf.parse()) {
 			logp (sys::e_debug, "Error parsing configuration file.");
-			return -1;
+			::exit (-3);
 		}
 
 		sys::conf::block_t * b = conf.find("sys");
@@ -92,7 +100,7 @@ int main (int argc, char ** argv)
 
 		sys::conf::block_t * main = conf.find("sys/main/subprojects");
 		if (! main)
-			throw "Can'f find 'sys/main' element in main.cc.";
+			throw "Can't find 'sys/main' element in conf file.";
 
 		sys::conf::block_t * sub = main; //->subelements["subprojects"];
 		sys::conf::block_t::mapblock_t::
@@ -100,167 +108,63 @@ int main (int argc, char ** argv)
 		sys::conf::block_t::mapblock_t::
 			iterator ite = sub->subelements.end();
 
+		logp (sys::e_debug, "Going through elements.");
 		for (; itb != ite; ++itb) {
 			auto data = *itb;
 			if (data->values["type"] == "lib") {
+				logp (sys::e_debug, "Found element " << data->values["name"] << " in list."); 
 				std::string name = data->values["name"];
-				std::string lib_name = data->values["gen"];
+				std::string lib_name = data->values["source"];
 				auto lib = conf.find("sys/" + lib_name);
+				
+				logp (sys::e_debug, "Going through subelements of " << data->values["name"] << ".");
 
-#if 0 // html
-				sys::parser indice_text ("../etc/web.index.plantilla",
-										 lib->name,
-										 *lib);
+				//data->values["templates"]
+				logp (sys::e_debug, "  Templates: ");
+				for (auto tmpl : lib->values_list) {
+					logp (sys::e_debug, "   template " << lib->name << ": "
+						  << tmpl);
+					auto begin = lib->subelements.begin();
+					auto end = lib->subelements.end();
+					for (; begin != end; ++begin) {
+						auto item = *begin;
+						logp (sys::e_debug, "Class: '" << item->name << "'.");
+						logp (sys::e_debug, "...");
+						sys::parser body_text (dname + "/" + tmpl,
+											   item->name,
+											   *item);
+						logp (sys::e_debug, "...");
+						std::string bname ("" + sys::lower(item->name) + ".txt");
+						sys::stat_t stat_file (bname);
+						if (stat_file) {
+							sys::file_system::safe_mv (bname, bname + ".old");
+						}
 
-				std::string pname ("generated/index.html");
-				sys::stat_t stat_indice (pname);
+						logp (sys::e_debug, "File to create: " << bname << ".");
+						std::ofstream body (bname);
+						if (! body.is_open()) {
+							logp (sys::e_crit, "NO BODY FILE!!! " << bname);
+							throw "Can't create body file";
+						}
 
-				std::ofstream indice (pname);
-				if (! indice.is_open()) {
-					logp (sys::e_crit, "NO INDICE FILE!!! " << pname);
-					throw "Can't create indice file";
-				}
-
-				std::cout << indice_text.resultado() << std::endl;
-				indice << indice_text.resultado();
-#endif
-
-#if 0 // protos
-				sys::parser proto_text ("../etc/hulk.proto.plantilla",
-										lib->name,
-										*lib);
-
-				std::string pname ("generated/hulk.proto");
-				//sys::stat_t stat_proto (pname);
-
-				//if (stat_proto) {
-				//	sys::file_system::safe_mv (pname, pname + ".old");
-				//}
-
-				std::ofstream proto (pname);
-				if (! proto.is_open()) {
-					logp (sys::e_crit, "NO PROTO FILE!!! " << pname);
-					throw "Can't create proto file";
-				}
-
-				std::cout << proto_text.resultado() << std::endl;
-				proto << proto_text.resultado();
-
-				return 0;
-#endif
-
-				auto begin = lib->subelements.begin();
-				auto end = lib->subelements.end();
-				for (; begin != end; ++begin) {
-					auto item = *begin;
-					logp (sys::e_debug, "Class: '" << item->name << "'.");
-#if 1 // business
-					/* business header
-					sys::parser header_text ("../etc/test.header.plantilla",
-											 item->name,
-											 *(item->subelements.begin()->second));
-
-					std::string hname ("generated/test" + sys::lower(item->name) + "business.h");
-					sys::stat_t stat_header (hname);
-
-					//if (stat_header) {
-					//	sys::file_system::safe_mv (hname, hname + ".old");
-					//}
-
-					std::ofstream header (hname);
-					if (! header.is_open()) {
-						logp (sys::e_crit, "NO HEADER FILE!!! " << hname);
-						throw "Can't create header file";
+						body << body_text.resultado();
+						std::cout << body_text.resultado() << std::endl;
 					}
-
-					header << header_text.resultado();
-					std::cout << header_text.resultado() << std::endl;
-					*/
-					
-					/* business body
-					 */
-					logp (sys::e_debug, "...");
-					sys::parser body_text ("../etc/test.doors.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					logp (sys::e_debug, "...");
-					std::string bname ("generated/" + sys::lower(item->name) + ".txt");
-
-
-					//if (stat_body) {
-					//	sys::file_system::safe_mv (bname, bname + ".old");
-					//}
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-					//break;
-#endif
-#if 0 // html
-					sys::parser body_text ("../etc/web.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					std::string bname ("generated/" + sys::lower(item->name) + ".html");
-					sys::stat_t stat_body (bname);
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-#endif
-#if 0
-					sys::parser body_text ("../etc/web.plantilla",
-										   item->name,
-										   *item);
-									  
-
-					std::string bname ("generated/" + sys::lower(item->name) + ".html");
-					sys::stat_t stat_body (bname);
-
-					std::ofstream body (bname);
-					if (! body.is_open()) {
-						logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-						throw "Can't create body file";
-					}
-
-					body << body_text.resultado();
-					std::cout << body_text.resultado() << std::endl;
-					break;
-#endif
 				}
 			}
 		}
-
-		/*
-		app::generator gen (conf);
-
-		gen.make_project ();
-		*/
-	} catch (char * err) {
-		std::cerr << "Exception: " << err << "." << std::endl;
-	} catch (const char * const err) {
-		std::cerr << "Exception: " << err << "." << std::endl;
 	} catch (const char * err) {
 		std::cerr << "Exception: " << err << "." << std::endl;
 	} catch (char * const err) {
+		std::cerr << "Exception: " << err << "." << std::endl;
+	} catch (const std::string &  err) {
 		std::cerr << "Exception: " << err << "." << std::endl;
 	} catch (const app::generator::create & err) {
 		std::cerr << "Exception: (create) " << err.what() << "." << std::endl;
 	} catch (const app::generator::file & err) {
 		std::cerr << "Exception: (file) " << err.what() << "." << std::endl;
+		} catch (const std::exception & err) {
+		std::cerr << "Exception (std): '" << err.what() << "'." << std::endl;
 	} catch (...) {
 		std::cerr << "Exception: unknown." << std::endl;
 	}
@@ -290,4 +194,3 @@ namespace app {
 	}
 
 } // end namespace app
-

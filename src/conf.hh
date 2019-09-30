@@ -41,6 +41,7 @@ namespace sys {
 	{
 	public:
         typedef std::map<std::string, std::string> mapstring_t;
+        typedef std::vector<std::string> vecstring_t;
         class block_t
         {
         public:
@@ -52,6 +53,7 @@ namespace sys {
             block_t * parent;
             std::string name;
             mapstring_t values;
+            vecstring_t values_list;
             mapblock_t subelements;
         };
 
@@ -76,6 +78,7 @@ namespace sys {
 
         std::string get_name ();
         std::string get_value ();
+        vecstring_t get_list_values ();
 
         bool match (char ch);
         bool is_comment ();

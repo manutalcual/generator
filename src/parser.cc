@@ -140,7 +140,7 @@ namespace sys {
 
 	std::string parser::escape_slash (int & i)
 	{
-		std::string word;
+        std::string word;
 		std::string command;
 		
 		if (_str[i] == '\\') {
