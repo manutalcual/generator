@@ -89,11 +89,11 @@ namespace sys {
 		std::string capture_until (int & i, char ch);
 		std::string capture_oper (int & i);
 		std::string capture_num (int & i);
-		
+
 
 		void skip_blanks (int & i);
 		void skip_between (int & i);
-		void skip_bloque (int & i);
+		void skip_block (int & i);
 		void push_scope (scope_t & scope);
 		void pop_scope ();
 	};
@@ -102,5 +102,3 @@ namespace sys {
 
 
 #endif // parser_hh
-
-

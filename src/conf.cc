@@ -39,8 +39,8 @@ namespace sys {
           _parsed (false)
 	{
         nflog ();
-        logp (sys::e_debug, "Data to parse:");
-        logp (sys::e_debug, _data);
+        nlogp (sys::e_debug, "Data to parse:");
+        nlogp (sys::e_debug, _data);
 	}
 
     conf::~conf ()
@@ -64,10 +64,10 @@ namespace sys {
         // Normally there are comments at begining of file, so begin
         // removing comments.
         //
-        logp (sys::e_debug, "Skip first comments.");
+        nlogp (sys::e_debug, "Skip first comments.");
         skip_comments ();
 
-        logp (sys::e_debug, "Begin with parse itself.");
+        nlogp (sys::e_debug, "Begin with parse itself.");
 
 		parse_block ();
 
@@ -82,12 +82,12 @@ namespace sys {
     {
         nflog ();
 
-		logp (sys::e_debug, "Looking for path: " << bname);
+		nlogp (sys::e_debug, "Looking for path: " << bname);
         block_t * b = find(bname, _first);
 		if (b) {
-			logp (sys::e_debug, "Name found: " << b->name);
+			nlogp (sys::e_debug, "Name found: " << b->name);
 		} else {
-			logp (sys::e_debug, "Name not found!");
+			nlogp (sys::e_debug, "Name not found!");
 		}
 		return b;
     }
@@ -105,22 +105,22 @@ namespace sys {
         } else {
             fname = bname;
 		}
-		logp (sys::e_debug, "Looking for: " << fname
+		nlogp (sys::e_debug, "Looking for: " << fname
 			  << " in " << b->name);
 
         block_t::mapblock_t::iterator itb = b->subelements.begin();
         block_t::mapblock_t::iterator ite = b->subelements.end();
 
         for (; itb != ite; ++itb) {
-            logp (sys::e_debug, "Block name: " << (*itb)->name
+            nlogp (sys::e_debug, "Block name: " << (*itb)->name
                   << "; looking for: " << fname);
 
             if ((*itb)->name == fname) {
-                logp (sys::e_debug, "This is the name.");
+                nlogp (sys::e_debug, "This is the name.");
                 size_t p = bname.find("/");
                 if (p != std::string::npos) {
                     bname = bname.substr(p + 1);
-                    logp (sys::e_debug, "Next name to look for: "
+                    nlogp (sys::e_debug, "Next name to look for: "
                           << bname);
                     ret = find(bname, *itb);
                 } else {
@@ -145,7 +145,7 @@ namespace sys {
         _first->name = "configuration";
         do {
             parse_block_body ();
-            logp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
+            nlogp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
         } while (! match('}') && _idx < _size);
     }
 
@@ -155,7 +155,7 @@ namespace sys {
 
         skip_blanks ();
         _last->name = get_name();
-        logp (sys::e_debug, "Block name: " << _last->name);
+        nlogp (sys::e_debug, "Block name: " << _last->name);
         skip_blanks ();
     }
 
@@ -163,16 +163,16 @@ namespace sys {
     {
         nflog ();
 
-        logp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
+        nlogp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
         skip_blanks ();
-        logp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
+        nlogp (sys::e_debug, "char at pos: " << _data[_idx] << ".");
         std::string bname = get_name();
         skip_blanks ();
 
-        logp (sys::e_debug, "Body name: " << bname);
+        nlogp (sys::e_debug, "Body name: " << bname);
 
         if (bname == "") {
-            logp (sys::e_crit, "Block body name is empty. '"
+            nlogp (sys::e_crit, "Block body name is empty. '"
                   << bname << "'");
             throw "Block body name is empty.";
         }
@@ -181,18 +181,19 @@ namespace sys {
             incr (); // ++_idx; // skip ':'
             skip_blanks ();
             if (match('[')) {
+                nlogp (sys::e_debug, "We are getting value list in '" << _last->name << "'.");
                 incr (); //++_idx; // skip '['
                 vecstring_t val_list = get_list_values();
-                /*
-                for (auto e : val_list) {
-                    logp (sys::e_debug, "   adding value: " 
-                          << e);
-                    _last->values_list.push_back (e);
+
+                for (vecstring_t::iterator e = val_list.begin(); e != val_list.end(); ++e) {
+                    nlogp (sys::e_debug, "   adding value: "
+                          << *e << " to " << _last->name);
+                    _last->values_list.push_back (*e);
                 }
-                */
+
             } else {
                 std::string val = get_value();
-                logp (sys::e_debug, "Inserting: " 
+                nlogp (sys::e_debug, "Inserting: "
                       << bname << "=" << val
                       << ", into " << _last->name);
                 _last->values[bname] = val;
@@ -202,13 +203,13 @@ namespace sys {
             incr (); //++_idx; // skip '{'
             ++_scope;
 
-            logp (sys::e_debug, "Adding new to: " << _last->name
+            nlogp (sys::e_debug, "Adding new to: " << _last->name
                   << "; the new is: " << bname);
 
             block_t * newblock = new block_t;
             newblock->name = bname;
             newblock->parent = _last;
-            
+
             _last->subelements.push_back (newblock);
             _last = newblock;
 
@@ -217,7 +218,7 @@ namespace sys {
             } while (! match ('}'));
 
             _last = _last->parent;
-            
+
             incr (); //++_idx; // skip '}'
             --_scope;
 		} else if (match('/')) {
@@ -226,7 +227,7 @@ namespace sys {
         } else if (_idx >= _size) {
             return;
         } else {
-            logp (sys::e_crit, "conf parser was expecting "
+            nlogp (sys::e_crit, "conf parser was expecting "
                   << "':' or '}', but the char at pos is: '"
                   << _data[_idx]
                   << "'; can't continue parsing. "
@@ -234,7 +235,7 @@ namespace sys {
             throw "Conf file not correct.";
         }
 
-        logp (sys::e_debug, "char at pos: " << _data[_idx] << ". "
+        nlogp (sys::e_debug, "char at pos: " << _data[_idx] << ". "
               << _idx);
         skip_blanks ();
     }
@@ -244,14 +245,14 @@ namespace sys {
         nflog ();
         std::string val;
 
-        while (_idx < _size 
+        while (_idx < _size
                && (::isalnum(_data[_idx]) || _data[_idx] == '_'))
         {
             val += _data[_idx];
             incr ();
         }
 
-        logp (sys::e_debug, val);
+        nlogp (sys::e_debug, val);
 
         return val;
     }
@@ -271,7 +272,7 @@ namespace sys {
             incr (); //++_idx; // skip '"'
             skip_blanks ();
             if (! match(';')) {
-                logp (sys::e_crit, "conf parser was expecting "
+                nlogp (sys::e_crit, "conf parser was expecting "
                       << "';', but the char at pos is: '"
                       << _data[_idx]
                       << "'; can't continue parsing.");
@@ -284,7 +285,7 @@ namespace sys {
                 incr ();
             }
             if (! match(';')) {
-                logp (sys::e_crit, "conf parser was expecting "
+                nlogp (sys::e_crit, "conf parser was expecting "
                       << "';', but the char at pos is: '"
                       << _data[_idx]
                       << "'; can't continue parsing.");
@@ -293,7 +294,7 @@ namespace sys {
             incr (); //++_idx; // skip ';'
         }
 
-        logp (sys::e_debug, value);
+        nlogp (sys::e_debug, value);
 
         return value;
     }
@@ -311,11 +312,10 @@ namespace sys {
                     value += _data[_idx];
                     incr ();
                 }
-                _last->values_list.push_back (value);
-                logp (sys::e_debug, "   adding value: " 
+               nlogp (sys::e_debug, "   adding value: "
                       << value << " to "
                       << _last->name);
-                //values.push_back (value);
+                values.push_back (value);
                 incr ();
             } else {
                 while (_idx < _size
@@ -326,10 +326,10 @@ namespace sys {
                     value += _data[_idx];
                     incr ();
                 }
-                _last->values_list.push_back (value);
-                logp (sys::e_debug, "   adding value: " 
-                      << value);
-                //values.push_back (value);
+                nlogp (sys::e_debug, "   adding value: "
+                      << value << " to "
+                      << _last->name);
+                values.push_back (value);
             }
             if (match(',')) {
                 incr ();
@@ -338,7 +338,7 @@ namespace sys {
             skip_blanks ();
         }
         if (!match(']')) {
-            logp (sys::e_crit, "conf parser was expecting "
+            nlogp (sys::e_crit, "conf parser was expecting "
                   << "']', but the char at pos is: '"
                   << _data[_idx]
                   << "'; can't continue parsing.");
@@ -347,7 +347,7 @@ namespace sys {
         incr (); //++_idx; // skip ']'
 
         if (!match(';')) {
-            logp (sys::e_crit, "conf parser was expecting "
+            nlogp (sys::e_crit, "conf parser was expecting "
                   << "';', but the char at pos is: '"
                   << _data[_idx]
                   << "'; can't continue parsing.");
@@ -377,7 +377,7 @@ namespace sys {
 			_idx += 2; // skip '*/'
 			return false;
 		}
-		
+
         if (_data[_idx] == '/' && _data[_idx + 1] == '/')
             return true;
 
@@ -409,7 +409,7 @@ namespace sys {
         block_t::mapblock_t::iterator ite = f->subelements.end();
 
         for (; itb != ite; ++itb) {
-            logp (sys::e_debug, "Block name: " << (*itb)->name);
+            nlogp (sys::e_debug, "Block name: " << (*itb)->name);
             if ((*itb)->subelements.size())
                 block (*itb);
         }
@@ -419,10 +419,10 @@ namespace sys {
     {
         (void) f; // avoid warning unused
 #if 0
-        logp (sys::e_debug, "Sub-block name (next): " << f->name);
+        nlogp (sys::e_debug, "Sub-block name (next): " << f->name);
 
         if (f->follow) {
-			logp (sys::e_debug, "following node: "
+			nlogp (sys::e_debug, "following node: "
 				  << f->follow->name);
             block (f->follow);
 		}
@@ -430,11 +430,10 @@ namespace sys {
         block_t * sf = f->next;
 
         if (f->next) {
-			logp (sys::e_debug, "sub node: " << f->next->name);
+			nlogp (sys::e_debug, "sub node: " << f->next->name);
             subblock (f->next);
 		}
 #endif
     }
 
 } // end namespace sys
-

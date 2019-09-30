@@ -1,0 +1,55 @@
+/*
+ * (c) 2001-2019 Copyright Amadeus
+ * Unauthorized use and disclosure strictly forbidden.
+ *
+ * \\file $_.h
+ * \\author $user
+ * \\date $date
+ *
+ */
+#pragma once
+
+#include <string>
+#include <ttr/DataContainer.hpp>
+#include "restapi/ServiceObjectFactory.h"
+#include "database.hh"
+#include "database/Collection.h"
+
+namespace sim {
+namespace database {
+
+class $_ : public EntryAction {
+ public:
+  $_(const std::string& iDbName);
+  virtual ~$_();
+  virtual ttr::DataContainer get(\for fields [const %.type& i%\if %# != %?last [, ]]);
+
+ private:
+};
+}  // namespace database
+}  // namespace sim
+
+/**
+ * \\brief
+ *
+ */
+class $_ : public database
+{
+public:
+    $_ ();
+    /// Destructor
+    ~$_();
+  \for fields [%.type % (); // % %# %?last
+    bool % (%.type i%);
+    ]
+    bool insert ();
+    bool update ();
+    bool del ();
+    // def. funciones acceso
+protected:
+private:
+    \for fields [%.type _a%;
+    ]
+};
+
+#endif // End \do ucase [${_}]_H

@@ -3,8 +3,8 @@
 //! @brief Nombre del proyecto, bloque.
 //
 // Todos los derechos reservados por By Tech.
-// La información aquí contenida es propiedad confidencial de la Empresa. 
-// La utilización, divulgación, reproducción y distribución, total o parcial, 
+// La información aquí contenida es propiedad confidencial de la Empresa.
+// La utilización, divulgación, reproducción y distribución, total o parcial,
 // de la misma está estrictamente prohibida. Salvo acuerdo expreso con By Tech.
 // Micro:         Nombre del microcontrolador
 // Proyecto:      PY-XXX. Nombre del proyecto
@@ -12,7 +12,7 @@
 // Author: manuelcano@by.com.es
 // Date: Mon Dec  7 15:45:56 2015
 // Time-stamp: <>
-// 
+//
 // $Id$
 //
 //
@@ -33,6 +33,7 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -81,7 +82,7 @@
 #define logpd(y) std::cerr												\
 	<< "[" << __FILE__													\
 	<< ":" << __LINE__	<< "] "											\
-	<< y 
+	<< y
 
 #define nflog()
 #define nlogpn(x,y)
@@ -164,7 +165,7 @@ namespace sys {
 	private:
 	};
 
-    namespace env 
+    namespace env
     {
 		std::string get (std::string nom);
 		std::string user ();
@@ -215,4 +216,3 @@ namespace sys {
 } // end namespace sys
 
 #endif // common_hh
-

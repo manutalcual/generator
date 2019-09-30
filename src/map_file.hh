@@ -3,8 +3,8 @@
 //! @brief Nombre del proyecto, bloque.
 //
 // Todos los derechos reservados por By Tech.
-// La información aquí contenida es propiedad confidencial de la Empresa. 
-// La utilización, divulgación, reproducción y distribución, total o parcial, 
+// La información aquí contenida es propiedad confidencial de la Empresa.
+// La utilización, divulgación, reproducción y distribución, total o parcial,
 // de la misma está estrictamente prohibida. Salvo acuerdo expreso con By Tech.
 // Micro:         Nombre del microcontrolador
 // Proyecto:      PY-XXX. Nombre del proyecto
@@ -12,7 +12,7 @@
 // Author: Manuel Cano Muñoz
 // Date: Thu Dec 10 09:17:37 2015
 // Time-stamp: <>
-// 
+//
 // $Id$
 //
 //
@@ -30,6 +30,7 @@
 #include <string.h>
 #include <strings.h>
 #include <string>
+#include <stdexcept>
 
 #include "common.hh"
 #include "stat.hh"
@@ -61,5 +62,3 @@ namespace sys {
 
 
 #endif // map_file_hh
-
-

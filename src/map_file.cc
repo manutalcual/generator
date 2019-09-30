@@ -3,8 +3,8 @@
 //! @brief Nombre del proyecto, bloque.
 //
 // Todos los derechos reservados por By Tech.
-// La información aquí contenida es propiedad confidencial de la Empresa. 
-// La utilización, divulgación, reproducción y distribución, total o parcial, 
+// La información aquí contenida es propiedad confidencial de la Empresa.
+// La utilización, divulgación, reproducción y distribución, total o parcial,
 // de la misma está estrictamente prohibida. Salvo acuerdo expreso con By Tech.
 // Micro:         Nombre del microcontrolador
 // Proyecto:      PY-XXX. Nombre del proyecto
@@ -12,7 +12,7 @@
 // Author: Manuel Cano Muñoz
 // Date: Thu Dec 10 09:17:37 2015
 // Time-stamp: <>
-// 
+//
 // $Id$
 //
 //
@@ -57,6 +57,7 @@ namespace sys {
 								   _fd,
 								   0);
 			if (_buf == MAP_FAILED) {
+				std::string ex ("File '");
 				switch (errno) {
 				case EACCES:
 				case EAGAIN:
@@ -68,7 +69,10 @@ namespace sys {
 					break;
 				case ENFILE:
 				default:
-					logp (sys::e_debug, "Error mapping file.");
+					logp (sys::e_debug, "Error mapping file '" << fname << "'.");
+					ex += fname;
+					ex += "' doesn't exists";
+					throw std::invalid_argument(ex);
 					break;
 				}
 				::close (_fd);
@@ -91,5 +95,3 @@ namespace sys {
 	}
 
 } // end namespace sys
-
-

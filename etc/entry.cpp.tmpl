@@ -1,0 +1,44 @@
+/*
+ * (c) 2001-2019 Copyright Amadeus
+ * Unauthorized use and disclosure strictly forbidden.
+ *
+ * \\file $_.h
+ * \\author $user
+ * \\date $date
+ *
+ */
+#include "$_.hpp"
+
+namespace sim {
+namespace database {
+
+$_::$_(const std::string& iDbName) : _dbName(iDbName) {
+}
+
+ttr::DataContainer $_::get(\for fields [const %.type& i%\if %# != %?last [, ]]) {
+  bsoncxx::v_noabi::builder::stream::document document{};
+  ttr::DataContainer aData;
+
+  try {
+    _collectionName << "%.collection"
+                    << bsoncxx::builder::stream::open_document \for fields [<< "\do lcase [%] \\$eq i%\if %# != %?last [, ]" ]
+                    << bsoncxx::builder::stream::close_document;
+    aData = find(document);
+  }
+  catch (dsclient::exception::Exception& ex) {
+    APMLOG_ERROR("[SIM][DATABASE] dsclient::exception: '" << bsoncxx::v_noabi::to_json(ex.rawError()->view()) << "'");
+    throw;
+  }
+  catch (mdw::Exception& aException) {
+    APMLOG_ERROR("[SIM][DATABASE] Invalid json document retrieved - skipping it - '" << aException.what() << "'");
+    throw;
+  }
+  catch (std::exception& ex) {
+    APMLOG_ERROR("[SIM][DATABASE] Exception caught: '" << ex.what() << "'");
+    throw;
+  }
+
+  return aData;
+}
+}  // database
+}  // sim

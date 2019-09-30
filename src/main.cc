@@ -3,8 +3,8 @@
 //! @brief Nombre del proyecto, bloque.
 //
 // Todos los derechos reservados por By Tech.
-// La información aquí contenida es propiedad confidencial de la Empresa. 
-// La utilización, divulgación, reproducción y distribución, total o parcial, 
+// La información aquí contenida es propiedad confidencial de la Empresa.
+// La utilización, divulgación, reproducción y distribución, total o parcial,
 // de la misma está estrictamente prohibida. Salvo acuerdo expreso con By Tech.
 // Micro:         Nombre del microcontrolador
 // Proyecto:      PY-XXX. Nombre del proyecto
@@ -12,7 +12,7 @@
 // Author: manuelcano@by.com.es
 // Date: Mon Dec  7 15:45:56 2015
 // Time-stamp: <>
-// 
+//
 // $Id$
 //
 //
@@ -102,53 +102,78 @@ int main (int argc, char ** argv)
 		if (! main)
 			throw "Can't find 'sys/main' element in conf file.";
 
-		sys::conf::block_t * sub = main; //->subelements["subprojects"];
-		sys::conf::block_t::mapblock_t::
-			iterator itb = sub->subelements.begin();
-		sys::conf::block_t::mapblock_t::
-			iterator ite = sub->subelements.end();
+		sys::conf::block_t::mapblock_t::iterator itb = main->subelements.begin();
+		sys::conf::block_t::mapblock_t::iterator ite = main->subelements.end();
 
 		logp (sys::e_debug, "Going through elements.");
 		for (; itb != ite; ++itb) {
-			auto data = *itb;
+			sys::conf::block_t * data = *itb;
 			if (data->values["type"] == "lib") {
-				logp (sys::e_debug, "Found element " << data->values["name"] << " in list."); 
+				logp (sys::e_debug, "Found element " << data->values["name"] << " in list.");
 				std::string name = data->values["name"];
 				std::string lib_name = data->values["source"];
-				auto lib = conf.find("sys/" + lib_name);
-				
-				logp (sys::e_debug, "Going through subelements of " << data->values["name"] << ".");
+				sys::conf::block_t * lib = conf.find("sys/" + lib_name);
+				sys::conf::block_t * templates = conf.find("sys/" + lib_name + "/templates");
 
-				//data->values["templates"]
-				logp (sys::e_debug, "  Templates: ");
-				for (auto tmpl : lib->values_list) {
-					logp (sys::e_debug, "   template " << lib->name << ": "
-						  << tmpl);
-					auto begin = lib->subelements.begin();
-					auto end = lib->subelements.end();
-					for (; begin != end; ++begin) {
-						auto item = *begin;
-						logp (sys::e_debug, "Class: '" << item->name << "'.");
-						logp (sys::e_debug, "...");
-						sys::parser body_text (dname + "/" + tmpl,
-											   item->name,
-											   *item);
-						logp (sys::e_debug, "...");
-						std::string bname ("" + sys::lower(item->name) + ".txt");
-						sys::stat_t stat_file (bname);
-						if (stat_file) {
-							sys::file_system::safe_mv (bname, bname + ".old");
+				logp (sys::e_debug, "Going through subelements of " << name << ".");
+
+				logp (sys::e_debug, "  Templates of " << lib->name << ": ");
+				sys::conf::block_t::mapblock_t::iterator tmpl = templates->subelements.begin();
+				sys::conf::block_t::mapblock_t::iterator tmple = templates->subelements.end();
+				for ( ; tmpl != tmple; ++tmpl) {
+
+					logp (sys::e_debug, "   template " << (*tmpl)->name << ".");
+					logp (sys::e_debug, "     header " << (*tmpl)->values["header"] << ".");
+
+					sys::conf::block_t::mapblock_t::iterator bobjs = lib->subelements.begin();
+					sys::conf::block_t::mapblock_t::iterator eobjs = lib->subelements.end();
+					++bobjs; // skip 'templates' element
+					logp (sys::e_debug, "  Go to '" << lib->name << "'");
+					for ( ; bobjs != eobjs; ++bobjs) {
+						logp (sys::e_debug, "     Subelement: '" << (*bobjs)->name << "'");
+						if ((*tmpl)->values["header"] != "") {
+							sys::parser body_text (dname + "/" + (*tmpl)->values["header"],
+																		 (*bobjs)->name,
+																		 *(*bobjs));
+
+							std::string bname ("" + (*bobjs)->name + (*tmpl)->values["header_extension"]);
+							sys::stat_t stat_file (bname);
+							if (stat_file) {
+								sys::file_system::safe_mv (bname, bname + ".old");
+							}
+
+							logp (sys::e_debug, "File to create: " << bname << ".");
+							std::ofstream body (bname.c_str(), std::ios::out);
+							if (! body.is_open()) {
+								logp (sys::e_crit, "NO BODY FILE!!! " << bname);
+								throw "Can't create body file";
+							}
+
+							body << body_text.resultado();
+							std::cout << body_text.resultado() << std::endl;
 						}
 
-						logp (sys::e_debug, "File to create: " << bname << ".");
-						std::ofstream body (bname);
-						if (! body.is_open()) {
-							logp (sys::e_crit, "NO BODY FILE!!! " << bname);
-							throw "Can't create body file";
-						}
+						if ((*tmpl)->values["body"] != "") {
+							sys::parser body_text (dname + "/" + (*tmpl)->values["body"],
+																		 (*bobjs)->name,
+																		 *(*bobjs));
 
-						body << body_text.resultado();
-						std::cout << body_text.resultado() << std::endl;
+							std::string bname ("" + (*bobjs)->name + (*tmpl)->values["body_extension"]);
+							sys::stat_t stat_file (bname);
+							if (stat_file) {
+								sys::file_system::safe_mv (bname, bname + ".old");
+							}
+
+							logp (sys::e_debug, "File to create: " << bname << ".");
+							std::ofstream body (bname.c_str(), std::ios::out);
+							if (! body.is_open()) {
+								logp (sys::e_crit, "NO BODY FILE!!! " << bname);
+								throw "Can't create body file";
+							}
+
+							body << body_text.resultado();
+							std::cout << body_text.resultado() << std::endl;
+						}
 					}
 				}
 			}

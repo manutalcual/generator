@@ -31,7 +31,7 @@ namespace sys {
 		logp (sys::e_debug, "Pidiendo análisis.");
 
 		// First scope
-		
+
 		scope_t scope;
 		scope.block = &_bloque;
 		scope.begin = _bloque.subelements.begin();
@@ -39,7 +39,7 @@ namespace sys {
 		scope.count = _bloque.subelements.size();
 		scope.index = 1;
 		_scopes.push_back (scope);
-		
+
         _ok = analiza();
 
         logp (sys::e_debug, "Se han recorrido " << _i << " bytes.");
@@ -71,7 +71,7 @@ namespace sys {
 	std::string parser::escapa (int & i)
 	{
 		std::string word;
-		
+
 		word = escapa(i, '\0');
 
 		return word;
@@ -80,7 +80,7 @@ namespace sys {
 	std::string parser::escapa (int & i, char ch)
 	{
 		std::string word;
-		
+
 		do {
 			switch (_str[i]) {
 			case '\\':
@@ -107,22 +107,24 @@ namespace sys {
 		std::string command;
 
 		if (_str[i] == '?') {
-			word = "?";
+			word = "";
 			++i;
 			command = capture_word(i);
+      if (command == "last")
+        word = sys::itoa(_scopes[_cur_scope - 1].count);
 		} else if (_str[i] == '.') {
 			++i;
 			command = capture_word(i);
 			word = _scopes[_cur_scope].block->values[command];
-            if (word == "") {
-                word = "." + command;
-            }
+      if (word == "") {
+        word = "." + command;
+      }
 		} else if (_str[i] == '#') {
 			std::string num;
 			logp (sys::e_debug, "Field num: ("
 				  << _cur_scope << ") "
 				  << _scopes[_cur_scope].index);
-			int s = _scopes[_cur_scope].index; 
+			int s = _scopes[_cur_scope].index;
 			++i;
 			if (_str[i] == '+') {
 				++i;
@@ -140,12 +142,13 @@ namespace sys {
 
 	std::string parser::escape_slash (int & i)
 	{
-        std::string word;
+    std::string word;
 		std::string command;
-		
+
 		if (_str[i] == '\\') {
-			word = "\\";
+			//word = "\\";
 			++i;
+      word = capture_word(i);
 		} else {
 			command = capture_word(i);
 			word = process_command(command, i);
@@ -157,13 +160,13 @@ namespace sys {
 	std::string parser::process_command (std::string command, int & i)
 	{
 		std::string word;
-		
+
 		skip_blanks (i);
 		if (command == "for") {
 			word = process_for(i);
 		} else if (command == "do") {
 			word = process_do(i);
-			skip_blanks (i);
+			//skip_blanks (i);
 		} else if (command == "if") {
 			word = process_if(i);
 			skip_blanks (i);
@@ -194,9 +197,9 @@ namespace sys {
 			if (op1 == op2) {
 				run_block (i, word);
 				skip_between (i);
-				skip_bloque (i);
+				skip_block (i);
 			} else {
-				skip_bloque (i);
+				skip_block (i);
 				skip_between (i);
 				run_block (i, word);
 			}
@@ -204,9 +207,9 @@ namespace sys {
 			if (op1 != op2) {
 				run_block (i, word);
 				skip_between (i);
-				skip_bloque (i);
+				skip_block (i);
 			} else {
-				skip_bloque (i);
+				skip_block (i);
 				skip_between (i);
 				run_block (i, word);
 			}
@@ -265,15 +268,17 @@ namespace sys {
 			if (!look_for_subelement(subelem, scope_depth)) {
 				logp (sys::e_crit, "Subelement '"
 					  << subelem
-					  << "' not found!");
-				--i; // skip_bloque will try to skip '[', so go back
+					  << "' not found in '"
+                      << _scopes[_cur_scope].block->name
+                      << "'");
+				--i; // skip_block will try to skip '[', so go back
 					 // one position
-				skip_bloque (i);
+				skip_block (i);
 				return "";
 			}
 		}
 
-		logp (sys::e_debug, "en for..... " << _cur_scope);
+		logp (sys::e_debug, "in for..... " << _cur_scope);
 		// This has to be initialized after looking for subelement
 		tblockite_t beg = _scopes[_cur_scope].block->subelements.begin();
 		tblockite_t end = _scopes[_cur_scope].block->subelements.end();;
@@ -332,7 +337,9 @@ namespace sys {
 			++i; // skip '['
 			com << tmp;
 			word = com.as_string();
-		}
+		} else {
+      logp (sys::e_debug, "Command '" << command << "' unknown.");
+    }
 		return word;
 	}
 
@@ -357,20 +364,20 @@ namespace sys {
 			word =  capture_word(i);
 		}
 
-		if (word == "usuario") {
-            word = sys::env::user();
-        } else if (word == "fecha") {
-            word = sys::date();
-        } else if (word == "_") {
-            word = _clase;
-        } else if (word == "") {
-            word = "";
+		if (word == "user") {
+      word = sys::env::user();
+    } else if (word == "date") {
+      word = sys::date();
+    } else if (word == "_") {
+      word = _clase;
+    } else if (word == "") {
+      word = "";
 		} else {
-            word = sys::env::get(word);
-            if (word == "") {
-                word = _scopes[_cur_scope].block->values[word];
-            }
-        }
+      word = sys::env::get(word);
+      if (word == "") {
+        word = _scopes[_cur_scope].block->values[word];
+      }
+    }
 
 		return word;
 	}
@@ -409,19 +416,19 @@ namespace sys {
 		return word;
 	}
 
-	void parser::skip_bloque (int & i)
+	void parser::skip_block (int & i)
 	{
 		int llaves = 1;
 
-		// Skip onlo if it is really a code block
+		// Skip only if it is really a code block
 		if (_str[i] != '[')
 			return;
-		
+
 		++i; // Skip '['
 		while (i < _size && llaves) {
 			if (_str[i] == ']') {
 				--llaves;
-			} else if (_str[i] == '[') {  
+			} else if (_str[i] == '[') {
 				++llaves;
 			}
 			++i;
@@ -450,7 +457,7 @@ namespace sys {
 		_scopes.push_back (scope);
 		++_cur_scope;
 	}
-	
+
 	void parser::pop_scope ()
 	{
 		_scopes.pop_back ();
@@ -460,7 +467,5 @@ namespace sys {
 			  << ", field num: "
 			  << _scopes[_cur_scope].index);
 	}
-	
+
 } // end namespace sys
-
-
